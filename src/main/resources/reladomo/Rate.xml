@@ -1,0 +1,8 @@
+<MithraObject objectType="transactional">
+    <PackageName>com.example.fxtrade.models</PackageName>
+    <ClassName>Rate</ClassName>
+    <DefaultTable>RATE</DefaultTable>
+    <Attribute name="currency" javaType="String" columnName="CURRENCY" primaryKey="true"/>
+    <Attribute name="date"  javaType="Date" columnName="DATE_D" primaryKey="true"/>
+    <Attribute name="rate" javaType="double" columnName="RATE"/>
+</MithraObject>

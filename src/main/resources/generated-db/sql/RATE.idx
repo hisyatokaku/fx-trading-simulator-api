@@ -1,0 +1,2 @@
+alter table RATE add constraint RATE_PK primary key (CURRENCY, DATE_D);
+

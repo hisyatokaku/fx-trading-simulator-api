@@ -1,0 +1,2 @@
+alter table SESSION add constraint SESSION_PK primary key (id);
+

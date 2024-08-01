@@ -1,0 +1,10 @@
+<MithraObject objectType="transactional">
+
+    <PackageName>com.example.fxtrade.models</PackageName>
+    <ClassName>Balance</ClassName>
+    <DefaultTable>BALANCE</DefaultTable>
+    <Attribute name="sessionId"  javaType="int" columnName="SESSION_ID" primaryKey="true"/>
+    <Attribute name="date"  javaType="Date" columnName="DATE_D" primaryKey="true"/>
+    <Attribute name="currency" javaType="String" columnName="CURRENCY" primaryKey="true"/>
+    <Attribute name="amount" javaType="double" columnName="AMOUNT"/>
+</MithraObject>

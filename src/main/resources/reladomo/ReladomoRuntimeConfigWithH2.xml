@@ -1,0 +1,11 @@
+<MithraRuntime>
+    <ConnectionManager
+            className="com.example.fxtrade.utils.reladomo.ReladomoConnectionManagerWithH2">
+        <MithraObjectConfiguration
+                className="com.example.fxtrade.models.Session" cacheType="partial"/>
+        <MithraObjectConfiguration
+                className="com.example.fxtrade.models.Balance" cacheType="partial"/>
+        <MithraObjectConfiguration
+                className="com.example.fxtrade.models.Rate" cacheType="partial"/>
+    </ConnectionManager>
+</MithraRuntime>

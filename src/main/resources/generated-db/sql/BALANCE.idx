@@ -1,0 +1,2 @@
+alter table BALANCE add constraint BALANCE_PK primary key (SESSION_ID, DATE_D, CURRENCY);
+

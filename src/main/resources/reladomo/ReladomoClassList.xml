@@ -1,0 +1,5 @@
+<Mithra>
+    <MithraObjectResource name="Session"/>
+    <MithraObjectResource name="Balance"/>
+    <MithraObjectResource name="Rate"/>
+</Mithra>

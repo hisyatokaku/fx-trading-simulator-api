@@ -1,0 +1,16 @@
+<MithraObject objectType="transactional">
+
+    <PackageName>com.example.fxtrade.models</PackageName>
+    <ClassName>Session</ClassName>
+    <DefaultTable>SESSION</DefaultTable>
+
+    <Attribute name="id"  javaType="int" columnName="id" primaryKey="true"/>
+    <Attribute name="userId" javaType="String" columnName="USER_ID" nullable="true"/>
+    <Attribute name="startDate"  javaType="Date" columnName="START_DATE"/>
+    <Attribute name="currentDate"  javaType="Date" columnName="C_DATE"/>
+    <Attribute name="endDate"  javaType="Date" columnName="END_DATE"/>
+    <Attribute name="isComplete" javaType="boolean" columnName="IS_COMPLETE"/>
+    <Attribute name="scenario" javaType="String" columnName="SCENARIO" nullable="false"/>
+    <Attribute name="jpyAmount" javaType="double" columnName="JPY_AMOUNT"/>
+
+</MithraObject>
