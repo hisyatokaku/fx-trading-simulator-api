@@ -33,7 +33,7 @@ dependencies {
 
 sourceSets {
 	main {
-		java.srcDirs += "C:\\Users\\henoh\\workspace\\gold-digger\\src\\main\\generated-java"
+		java.srcDirs += "src\\main\\generated-java"
 	}
 }
 
@@ -46,7 +46,7 @@ task mithraGenerateSources  {
 
 	ant.mithraGen(
 			xml:'src/main/resources/reladomo/ReladomoClassList.xml',
-			generatedDir:'C:\\Users\\henoh\\workspace\\gold-digger\\src\\main\\generated-java',
+			generatedDir:'src\\main\\generated-java',
 			nonGeneratedDir:'src/main/java',
 			generateConcreteClasses:'true'
 	)
@@ -59,7 +59,7 @@ task mithraGenerateSources  {
 
 	ant.genDdl(
 			xml:'src/main/resources/reladomo/ReladomoClassList.xml',
-			generatedDir:'C:\\Users\\henoh\\workspace\\gold-digger\\src\\main\\resources\\generated-db\\sql',
+			generatedDir:'src\\main\\resources\\generated-db\\sql',
 			databaseType: 'postgres'
 	)
 }
