@@ -1,52 +1,45 @@
-package com.example.fxtrade.manager;
+package com.example.fxtrade.component;
 
 import com.example.fxtrade.api.request.ExchangeRequest;
 import com.example.fxtrade.api.request.NextRequest;
+import com.example.fxtrade.manager.GameConfigGenerator;
 import com.example.fxtrade.models.*;
 import com.example.fxtrade.models.enums.Currency;
 import com.example.fxtrade.utils.reladomo.DateUtil;
 import com.gs.fw.common.mithra.AggregateList;
-import com.gs.fw.common.mithra.MithraNullPrimitiveException;
-import org.eclipse.collections.impl.Counter;
+import jakarta.annotation.PostConstruct;
 import org.eclipse.collections.impl.utility.ArrayIterate;
 import org.eclipse.collections.impl.utility.Iterate;
 import org.eclipse.collections.impl.utility.MapIterate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-public class SessionManager {
-    public synchronized static Session generateSession(Optional<String> userId, String scenario) {
+@Component
+public class SessionService {
+    @Value("${gameconfig.initialJpyAmount}")
+    private double initialJpyAmount;
+
+    public synchronized Session generateSession(Optional<String> userId, String scenario) {
         Session session = new Session();
         int sessionId = getId();
         session.setId(sessionId);
 
         session.setIsComplete(false);
-        session.setJpyAmount(1_000_000);
+        session.setJpyAmount(initialJpyAmount);
         userId.ifPresent(session::setUserId);
         GameConfigGenerator.setUpSession(session, scenario);
         session.insert();
-        new Balance(sessionId, session.getCurrentDate(), Currency.JPY.name(), 1_000_000).insert();
+        new Balance(sessionId, session.getCurrentDate(), Currency.JPY.name(), initialJpyAmount).insert();
         ArrayIterate.forEach(Currency.values(), currency -> {
             if(!currency.equals(currency.JPY)) new Balance(sessionId, session.getCurrentDate(), currency.name(), 0.d).insert();
         });
         return session;
     }
 
-    private static int getId() {
-        try {
-            AggregateList aggregateData = new AggregateList(SessionFinder.all());
-            aggregateData.addAggregateAttribute("max", SessionFinder.id().max());
-            return aggregateData.get(0).getAttributeAsInt("max") + 1;
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    public static Session next(NextRequest nextRequest) {
+    public Session next(NextRequest nextRequest) {
         Session session = SessionFinder.findByPrimaryKey(nextRequest.getSessionId());
         if(session.isIsComplete()) {
             throw new IllegalStateException("Session is complete");
@@ -86,7 +79,7 @@ public class SessionManager {
         return session;
     }
 
-    private static double calculateJpyAmount(Map<String, Balance> currencyToNewBalance, RateMatrix rateMatrix) {
+    private double calculateJpyAmount(Map<String, Balance> currencyToNewBalance, RateMatrix rateMatrix) {
         return MapIterate.collectValues(currencyToNewBalance, (currency, balance) -> {
             if(currency.equals("JPY")) {
                 return balance.getAmount();
@@ -96,13 +89,23 @@ public class SessionManager {
         }).sumOfDouble(d -> d);
     }
 
-    public static Session getSession(int sessionId) {
+    public Session getSession(int sessionId) {
         Session session = SessionFinder.findByPrimaryKey(sessionId);
         return session;
     }
 
-    public static SessionList getSessions(String userId) {
+    public SessionList getSessions(String userId) {
         SessionList sessions = SessionFinder.findMany(SessionFinder.userId().eq(userId));
         return sessions;
+    }
+
+    private int getId() {
+        try {
+            AggregateList aggregateData = new AggregateList(SessionFinder.all());
+            aggregateData.addAggregateAttribute("max", SessionFinder.id().max());
+            return aggregateData.get(0).getAttributeAsInt("max") + 1;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }
