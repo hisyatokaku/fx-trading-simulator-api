@@ -1,0 +1,10 @@
+<MithraObject objectType="transactional">
+
+    <PackageName>com.example.fxtrade.models</PackageName>
+    <ClassName>Trader</ClassName>
+    <DefaultTable>TRADER</DefaultTable>
+
+    <Attribute name="userId" javaType="String" columnName="USER_ID" nullable="false" primaryKey="true"/>
+    <Attribute name="type" javaType="String" columnName="TYPE_C" nullable="false"/>
+
+</MithraObject>

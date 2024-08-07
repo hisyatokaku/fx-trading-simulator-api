@@ -7,5 +7,7 @@
                 className="com.example.fxtrade.models.Balance" cacheType="partial"/>
         <MithraObjectConfiguration
                 className="com.example.fxtrade.models.Rate" cacheType="partial"/>
+        <MithraObjectConfiguration
+                className="com.example.fxtrade.models.Trader" cacheType="partial"/>
     </ConnectionManager>
 </MithraRuntime>

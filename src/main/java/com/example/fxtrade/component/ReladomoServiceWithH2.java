@@ -3,7 +3,7 @@ package com.example.fxtrade.component;
 import com.example.fxtrade.FxTradeApplication;
 import com.example.fxtrade.utils.reladomo.RateInitializer;
 import com.example.fxtrade.utils.reladomo.ReladomoConnectionManagerWithH2;
-import com.example.fxtrade.utils.reladomo.ReladomoConnectionManagerWithPostgresql;
+import com.example.fxtrade.utils.reladomo.TraderInitializer;
 import com.gs.fw.common.mithra.MithraManagerProvider;
 import jakarta.annotation.PostConstruct;
 import org.eclipse.collections.api.factory.Lists;
@@ -42,7 +42,7 @@ public class ReladomoServiceWithH2 {
         }
 
         LOGGER.info("Setting up tables in H2");
-        MutableList<String> files = Lists.mutable.of("BALANCE.ddl", "RATE.ddl", "SESSION.ddl");
+        MutableList<String> files = Lists.mutable.of("BALANCE.ddl", "RATE.ddl", "SESSION.ddl", "TRADER.ddl");
         try (Connection conn = ReladomoConnectionManagerWithH2.getInstance().getConnection()) {
             files.forEach(file -> {
                 URL url = FxTradeApplication.class.getClassLoader().getResource("generated-db/sql/" + file);
@@ -61,5 +61,6 @@ public class ReladomoServiceWithH2 {
 
         LOGGER.info("Setting up rates");
         RateInitializer.run();
+        TraderInitializer.run();
     }
 }

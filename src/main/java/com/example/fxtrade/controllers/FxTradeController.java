@@ -25,10 +25,10 @@ public class FxTradeController {
     }
     @PostMapping("/start/{scenario}/{userId}")
     public NextResponse startWithUserId(@PathVariable("scenario") String scenario, @PathVariable("userId") String userId) {
-        return runStart(Optional.of(userId), scenario);
+        return runStart(userId, scenario);
     }
 
-    private NextResponse runStart(Optional<String> userId, String scenario)
+    private NextResponse runStart(String userId, String scenario)
     {
         Session session = sessionService.generateSession(userId, scenario);
         return NextResponse.newWith(session);

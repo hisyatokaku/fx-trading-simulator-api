@@ -22,15 +22,14 @@ public class SessionService {
     @Value("${gameconfig.initialJpyAmount}")
     private double initialJpyAmount;
 
-    public synchronized Session generateSession(Optional<String> userId, String scenario) {
+    public synchronized Session generateSession(String userId, String scenario) {
         Session session = new Session();
         int sessionId = getId();
         session.setId(sessionId);
 
         session.setIsComplete(false);
         session.setJpyAmount(initialJpyAmount);
-        userId.ifPresent(session::setUserId);
-        GameConfigGenerator.setUpSession(session, scenario);
+        GameConfigGenerator.setUpSession(session, userId, scenario);
         session.insert();
         new Balance(sessionId, session.getCurrentDate(), Currency.JPY.name(), initialJpyAmount).insert();
         ArrayIterate.forEach(Currency.values(), currency -> {

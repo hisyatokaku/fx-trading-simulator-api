@@ -3,6 +3,7 @@ package com.example.fxtrade.component;
 import com.example.fxtrade.FxTradeApplication;
 import com.example.fxtrade.utils.reladomo.RateInitializer;
 import com.example.fxtrade.utils.reladomo.ReladomoConnectionManagerWithPostgresql;
+import com.example.fxtrade.utils.reladomo.TraderInitializer;
 import com.gs.fw.common.mithra.MithraManagerProvider;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -48,5 +49,7 @@ public class ReladomoServiceWithPsql {
 
         LOGGER.info("Setting up rates");
         RateInitializer.run();
+        LOGGER.info("Setting up traders");
+        TraderInitializer.run();
     }
 }

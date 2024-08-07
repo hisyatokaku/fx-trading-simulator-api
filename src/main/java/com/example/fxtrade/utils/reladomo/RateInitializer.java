@@ -2,6 +2,7 @@ package com.example.fxtrade.utils.reladomo;
 
 import com.example.fxtrade.FxTradeApplication;
 import com.example.fxtrade.models.Rate;
+import com.example.fxtrade.models.RateFinder;
 import com.example.fxtrade.models.RateList;
 import org.eclipse.collections.api.RichIterable;
 import org.eclipse.collections.api.factory.Lists;
@@ -26,13 +27,14 @@ import java.util.List;
 
 public class RateInitializer {
     public static void run() {
-        InputStream resourceAsStream = FxTradeApplication.class.getClassLoader().getResourceAsStream("rate/quote.csv");
+        InputStream resourceAsStream = FxTradeApplication.class.getClassLoader().getResourceAsStream("data/rates.csv");
         try {
+            RateFinder.findMany(RateFinder.all()).deleteAllInBatches(1000);
+
             // CSVファイルの読み込み
             InputStreamReader isr = new InputStreamReader(resourceAsStream, "UTF-8");
             BufferedReader reader = new BufferedReader(isr);
             List<String> lines = Lists.mutable.empty();
-            reader.skip(1);
             while(reader.ready()) {
                 lines.add(reader.readLine());
             }

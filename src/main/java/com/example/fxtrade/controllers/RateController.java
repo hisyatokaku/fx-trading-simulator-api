@@ -3,6 +3,7 @@ package com.example.fxtrade.controllers;
 import com.example.fxtrade.api.response.RateResponse;
 import com.example.fxtrade.api.response.RatesResponse;
 import com.example.fxtrade.manager.GameConfigGenerator;
+import com.example.fxtrade.models.GameConfig;
 import com.example.fxtrade.models.RateMatrix;
 import com.example.fxtrade.utils.reladomo.DateUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +27,7 @@ import java.util.Set;
 @RestController
 @RequestMapping(value = {"api/rate"})
 public class RateController {
-    private static final Set<LocalDate> INVALID_DATES = Sets.mutable.withAll(GameConfigGenerator.getDates("day3-x")).withAll(GameConfigGenerator.getDates("day3-y")).toSet().asUnmodifiable();
+    private static final Set<LocalDate> INVALID_DATES = GameConfig.getHiddenDatesForRates();
 
     @GetMapping("{date}")
     @Operation(summary = "Rate is available from 2002/4/1 to 2023/6/13 only on weekday. Disabled from 2018, 2021 year.")

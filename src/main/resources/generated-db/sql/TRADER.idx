@@ -1,0 +1,2 @@
+alter table TRADER add constraint TRADER_PK primary key (USER_ID);
+
