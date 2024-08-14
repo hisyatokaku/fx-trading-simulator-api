@@ -30,7 +30,6 @@ public class RateController {
     private static final Set<LocalDate> INVALID_DATES = GameConfig.getHiddenDatesForRates();
 
     @GetMapping("{date}")
-    @Operation(summary = "Rate is available from 2002/4/1 to 2023/6/13 only on weekday. Disabled from 2018, 2021 year.")
     public RatesResponse getRate(@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
         LocalDate startDate = date;
         LocalDate endDate = date;
@@ -44,7 +43,7 @@ public class RateController {
                     String currencyFrom = currencyFromAndTo.getOne();
                     String currencyTo = currencyFromAndTo.getTwo();
                     double rate = rateMatrix.getRate(currencyFrom, currencyTo);
-                    return new RateResponse(currencyTo + "/" + currencyFrom, rate);
+                    return new RateResponse(currencyFrom + "/" + currencyTo, rate);
                 }, Lists.mutable.empty());
                 dateToRatesResponse.put(date, rateResponses);
             }

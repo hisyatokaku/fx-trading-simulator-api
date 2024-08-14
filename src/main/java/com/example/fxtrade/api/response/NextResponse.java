@@ -41,7 +41,7 @@ public class NextResponse {
         for (Currency currencyFrom: Currency.values()) {
             for (Currency currencyTo: Currency.values()) {
                 if(!currencyFrom.equals(currencyTo)) {
-                    nextDateRates.put(currencyTo.name() + "/" + currencyFrom.name(), rateMatrix.getRate(currencyFrom.name(), currencyTo.name()));
+                    nextDateRates.put(currencyFrom.name() + "/" + currencyTo.name(), rateMatrix.getRate(currencyFrom.name(), currencyTo.name()));
                 }
             }
         }
