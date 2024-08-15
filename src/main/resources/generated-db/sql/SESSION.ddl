@@ -9,6 +9,7 @@ create table SESSION
     END_DATE date,
     IS_COMPLETE boolean,
     SCENARIO varchar(255) not null,
-    JPY_AMOUNT float8
+    JPY_AMOUNT float8,
+    COMMISSION_RATE float8
 );
 

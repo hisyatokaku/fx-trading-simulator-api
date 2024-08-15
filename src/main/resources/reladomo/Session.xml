@@ -12,5 +12,6 @@
     <Attribute name="isComplete" javaType="boolean" columnName="IS_COMPLETE"/>
     <Attribute name="scenario" javaType="String" columnName="SCENARIO" nullable="false"/>
     <Attribute name="jpyAmount" javaType="double" columnName="JPY_AMOUNT"/>
+    <Attribute name="commissionRate" javaType="double" columnName="COMMISSION_RATE"/>
 
 </MithraObject>
