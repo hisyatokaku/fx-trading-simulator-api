@@ -70,7 +70,7 @@ public class SessionService {
                 throw new IllegalStateException("Balance amount cannot be negative");
             balanceFrom.setAmount(newAmountForCurrencyFrom);
             Balance balanceTo = currencyToNewBalance.computeIfAbsent(currencyTo, (c) -> new Balance(session.getId(), nextDate, currencyTo, 0));
-            balanceTo.setAmount(balanceTo.getAmount() + amount * rate);
+            balanceTo.setAmount(balanceTo.getAmount() + amount * rate / (1 + session.getCommissionRate()));
         }
         session.setCurrentDate(nextDate);
         session.setJpyAmount(calculateJpyAmount(currencyToNewBalance, rateMatrix));

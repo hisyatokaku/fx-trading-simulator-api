@@ -26,6 +26,7 @@ public class GameConfigGenerator {
         session.setStartDate(DateUtil.toDate(gameConfig.getDateFrom()));
         session.setEndDate(DateUtil.toDate(gameConfig.getDateTo()));
         session.setCurrentDate(DateUtil.toDate(gameConfig.getDateFrom()));
+        session.setCommissionRate(gameConfig.getCommission());
         session.setScenario(scenario);
     }
 
