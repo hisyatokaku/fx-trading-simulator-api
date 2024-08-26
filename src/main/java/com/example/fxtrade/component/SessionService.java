@@ -75,7 +75,8 @@ public class SessionService {
         }
         MithraManagerProvider.getMithraManager().executeTransactionalCommand(tx -> {
             session.setCurrentDate(nextDate);
-            session.setJpyAmount(calculateJpyAmount(currencyToNewBalance, rateMatrix));
+            RateMatrix nextDateRateMatrix = RateMatrix.newWith(nextDate);
+            session.setJpyAmount(calculateJpyAmount(currencyToNewBalance, nextDateRateMatrix));
             new BalanceList(currencyToNewBalance.values()).insertAll();
             return null;
         });
