@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public enum GameConfig {
-    TEST0(LocalDate.of(2016, 1, 4), LocalDate.of(2016, 1, 11), 10., GameType.ANY),
+    TEST0(LocalDate.of(2016, 1, 4), LocalDate.of(2016, 1, 11), 0, GameType.ANY),
     TEST1(LocalDate.of(2017, 1, 4), LocalDate.of(2017, 1, 11), 10., GameType.ANY),
     PROD0(LocalDate.of(2016, 1, 4), LocalDate.of(2016, 12, 31), 10., GameType.PROD),
     PROD1(LocalDate.of(2017, 1, 4), LocalDate.of(2017, 12, 31), 10., GameType.PROD);

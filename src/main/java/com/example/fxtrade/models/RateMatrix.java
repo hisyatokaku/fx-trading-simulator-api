@@ -21,7 +21,7 @@ public class RateMatrix {
 
     public static RateMatrix newWith(Date date) {
         Map<Twin<String>, Double> currencyFromAndToToRate = Maps.mutable.empty();
-        RateList rates = RateFinder.findMany(RateFinder.date().eq(date));
+        RateList rates = RateFinder.findMany(RateFinder.date().eq(date).and(RateFinder.currency().in(Currency.CURRENCIES_AS_STRING)));
         for (Rate rate : rates) {
             String currencyFrom = rate.getCurrency();
             String currencyTo = Currency.JPY.name();
@@ -35,8 +35,8 @@ public class RateMatrix {
                 if (currencyFrom.equals(currencyTo)) {
                     continue;
                 }
-                double jpyRateForFromCurrency = currencyFromAndToToRate.get(Tuples.twin(currencyFrom, Currency.JPY.name())); // 340 KWD
-                double jpyRateForToCurrency = currencyFromAndToToRate.get(Tuples.twin(currencyTo, Currency.JPY.name())); // 0.85 IDR
+                double jpyRateForFromCurrency = currencyFromAndToToRate.get(Tuples.twin(currencyFrom, Currency.JPY.name()));
+                double jpyRateForToCurrency = currencyFromAndToToRate.get(Tuples.twin(currencyTo, Currency.JPY.name()));
                 currencyFromAndToToRate.put(Tuples.twin(currencyFrom, currencyTo), jpyRateForFromCurrency / jpyRateForToCurrency);
             }
         }
