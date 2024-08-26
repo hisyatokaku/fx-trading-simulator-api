@@ -15,7 +15,7 @@ public enum GameConfig {
     TEST1(LocalDate.of(2017, 1, 4), LocalDate.of(2017, 1, 11), 0.01, GameType.ANY),
     Jan_Mar_2016_without_commission(LocalDate.of(2016, 1, 4), LocalDate.of(2016, 3, 30), 0, GameType.ANY),
     Jan_Mar_2016_with_commission(LocalDate.of(2016, 1, 4), LocalDate.of(2016, 3, 30), 0.01, GameType.ANY),
-    Jan_Mar_2017_without_commission(LocalDate.of(2017, 1, 4), LocalDate.of(2016, 3, 30), 0, GameType.ANY),
+    Jan_Mar_2017_without_commission(LocalDate.of(2017, 1, 4), LocalDate.of(2017, 3, 30), 0, GameType.ANY),
     Jan_Mar_2017_with_commission(LocalDate.of(2017, 1, 4), LocalDate.of(2017, 3, 30), 0.01, GameType.ANY),
     Jan_Mar_2018_without_commission(LocalDate.of(2018, 1, 4), LocalDate.of(2018, 3, 30), 0, GameType.PROD),
     Jan_Mar_2018_with_commission(LocalDate.of(2018, 1, 4), LocalDate.of(2018, 3, 30), 0.01, GameType.PROD);
