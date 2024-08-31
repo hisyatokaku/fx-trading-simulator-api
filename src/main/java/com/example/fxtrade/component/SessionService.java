@@ -58,7 +58,7 @@ public class SessionService {
         for (ExchangeRequest exchangeRequest: exchangeRequests) {
             String currencyFrom = exchangeRequest.getCurrencyFrom();
             String currencyTo = exchangeRequest.getCurrencyTo();
-            double amount = exchangeRequest.getAmount();
+            double amount = Math.max(exchangeRequest.getAmount(), 0);
             double rate = rateMatrix.getRate(currencyFrom, currencyTo);
             Balance balanceFrom = currencyToNewBalance.computeIfAbsent(currencyFrom, (c) -> new Balance(session.getId(), nextDate, currencyFrom, 0));
             double newAmountForCurrencyFrom = Math.max(balanceFrom.getAmount() - amount, 0);
