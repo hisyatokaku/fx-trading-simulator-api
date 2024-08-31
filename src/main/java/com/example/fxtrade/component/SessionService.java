@@ -54,12 +54,7 @@ public class SessionService {
         Map<String, Balance> currencyToNewBalance = Iterate.toMap(currentBalances, balance -> balance.getCurrency(), balance -> new Balance(session.getId(), nextDate, balance.getCurrency(), balance.getAmount()));
         RateMatrix rateMatrix = RateMatrix.newWith(currentDate);
 
-        session.setCurrentDate(nextDate);
-
         List<ExchangeRequest> exchangeRequests = nextRequest.getExchangeRequests();
-        if(nextDate.equals(session.getEndDate()) || nextDate.after(session.getEndDate())) {
-            session.setIsComplete(true);
-        }
         for (ExchangeRequest exchangeRequest: exchangeRequests) {
             String currencyFrom = exchangeRequest.getCurrencyFrom();
             String currencyTo = exchangeRequest.getCurrencyTo();
@@ -71,13 +66,14 @@ public class SessionService {
             Balance balanceTo = currencyToNewBalance.computeIfAbsent(currencyTo, (c) -> new Balance(session.getId(), nextDate, currencyTo, 0));
             balanceTo.setAmount(balanceTo.getAmount() + amount * rate / (1 + session.getCommissionRate()));
         }
-        MithraManagerProvider.getMithraManager().executeTransactionalCommand(tx -> {
-            session.setCurrentDate(nextDate);
-            RateMatrix nextDateRateMatrix = RateMatrix.newWith(nextDate);
-            session.setJpyAmount(calculateJpyAmount(currencyToNewBalance, nextDateRateMatrix));
-            new BalanceList(currencyToNewBalance.values()).insertAll();
-            return null;
-        });
+
+        RateMatrix nextDateRateMatrix = RateMatrix.newWith(nextDate);
+        session.setJpyAmount(calculateJpyAmount(currencyToNewBalance, nextDateRateMatrix));
+        if(nextDate.equals(session.getEndDate()) || nextDate.after(session.getEndDate())) {
+            session.setIsComplete(true);
+        }
+        session.setCurrentDate(nextDate);
+        new BalanceList(currencyToNewBalance.values()).insertAll();
         return session;
     }
 
