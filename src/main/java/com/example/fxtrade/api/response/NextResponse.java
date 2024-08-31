@@ -6,10 +6,7 @@ import com.example.fxtrade.utils.reladomo.DateUtil;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.impl.utility.Iterate;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Map;
 
 public class NextResponse {
@@ -20,9 +17,9 @@ public class NextResponse {
     private final LocalDate currentDate;
     private final double jpyBalance;
     private final Map<String, Double> currencyToBalance;
-    private final Map<String, Double> nextDateRates;
+    private final Map<String, Double> currentDateRates;
 
-    public NextResponse(int sessionId, boolean isComplete, LocalDate startDate, LocalDate endDate, LocalDate currentDate, double jpyBalance, Map<String, Double> currencyToBalance, Map<String, Double> nextDateRates) {
+    public NextResponse(int sessionId, boolean isComplete, LocalDate startDate, LocalDate endDate, LocalDate currentDate, double jpyBalance, Map<String, Double> currencyToBalance, Map<String, Double> currentDateRates) {
         this.sessionId = sessionId;
         this.isComplete = isComplete;
         this.startDate = startDate;
@@ -30,18 +27,18 @@ public class NextResponse {
         this.currentDate = currentDate;
         this.jpyBalance = jpyBalance;
         this.currencyToBalance = currencyToBalance;
-        this.nextDateRates = nextDateRates;
+        this.currentDateRates = currentDateRates;
     }
 
     public static NextResponse newWith(Session session) {
         BalanceList balances = BalanceFinder.findMany(BalanceFinder.sessionId().eq(session.getId()).and(BalanceFinder.date().eq(session.getCurrentDate())));
         Map<String, Double> currencyToBalance = Iterate.toMap(balances, Balance::getCurrency, Balance::getAmount);
         RateMatrix rateMatrix = RateMatrix.newWith(DateUtil.toDate(DateUtil.toLocalDate(session.getCurrentDate())));
-        Map<String, Double> nextDateRates = Maps.mutable.empty();
+        Map<String, Double> currentDateRates = Maps.mutable.empty();
         for (Currency currencyFrom: Currency.values()) {
             for (Currency currencyTo: Currency.values()) {
                 if(!currencyFrom.equals(currencyTo)) {
-                    nextDateRates.put(currencyFrom.name() + "/" + currencyTo.name(), rateMatrix.getRate(currencyFrom.name(), currencyTo.name()));
+                    currentDateRates.put(currencyFrom.name() + "/" + currencyTo.name(), rateMatrix.getRate(currencyFrom.name(), currencyTo.name()));
                 }
             }
         }
@@ -49,7 +46,7 @@ public class NextResponse {
                 DateUtil.toLocalDate(session.getStartDate()),
                 DateUtil.toLocalDate(session.getEndDate()),
                 DateUtil.toLocalDate(session.getCurrentDate()),
-                session.getJpyAmount(), currencyToBalance, nextDateRates);
+                session.getJpyAmount(), currencyToBalance, currentDateRates);
     }
 
     public int getSessionId() {
@@ -80,7 +77,7 @@ public class NextResponse {
         return currencyToBalance;
     }
 
-    public Map<String, Double> getNextDateRates() {
-        return nextDateRates;
+    public Map<String, Double> getCurrentDateRates() {
+        return currentDateRates;
     }
 }

@@ -2,12 +2,10 @@ package com.example.fxtrade.models;
 
 import com.example.fxtrade.models.enums.GameType;
 import com.example.fxtrade.utils.reladomo.DateUtil;
-import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Sets;
 import org.eclipse.collections.impl.utility.ArrayIterate;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 public enum GameConfig {
@@ -15,10 +13,12 @@ public enum GameConfig {
     TEST1(LocalDate.of(2017, 1, 4), LocalDate.of(2017, 1, 11), 0.001, GameType.ANY),
     Jan_Mar_2016_without_commission(LocalDate.of(2016, 1, 4), LocalDate.of(2016, 3, 30), 0, GameType.ANY),
     Jan_Mar_2016_with_commission(LocalDate.of(2016, 1, 4), LocalDate.of(2016, 3, 30), 0.001, GameType.ANY),
-    Jan_Mar_2017_without_commission(LocalDate.of(2017, 1, 4), LocalDate.of(2017, 3, 30), 0, GameType.ANY),
-    Jan_Mar_2017_with_commission(LocalDate.of(2017, 1, 4), LocalDate.of(2017, 3, 30), 0.001, GameType.ANY),
-    Jan_Mar_2018_without_commission(LocalDate.of(2018, 1, 4), LocalDate.of(2018, 3, 30), 0, GameType.PROD),
-    Jan_Mar_2018_with_commission(LocalDate.of(2018, 1, 4), LocalDate.of(2018, 3, 30), 0.001, GameType.PROD);
+    Jun_Aug_2016_without_commission(LocalDate.of(2016, 6, 1), LocalDate.of(2017, 8, 31), 0, GameType.ANY),
+    Jun_Aug_2016_with_commission(LocalDate.of(2016, 6, 1), LocalDate.of(2017, 8, 31), 0.001, GameType.ANY),
+    Feb_Apr_2017_without_commission(LocalDate.of(2017, 2, 1), LocalDate.of(2017, 4, 28), 0, GameType.ANY),
+    Feb_Apr_2017_wit_commission(LocalDate.of(2017, 2, 1), LocalDate.of(2017, 4, 28), 0.001, GameType.ANY),
+    Jun_Aug_2017_without_commission(LocalDate.of(2017, 6, 1), LocalDate.of(2017, 8, 31), 0, GameType.PROD),
+    Jun_Aug_2017_with_commission(LocalDate.of(2017, 6, 1), LocalDate.of(2017, 8, 31), 0.001, GameType.PROD);
     private LocalDate dateFrom;
     private LocalDate dateTo;
     private double commission;
