@@ -66,9 +66,7 @@ public class SessionService {
             double amount = exchangeRequest.getAmount();
             double rate = rateMatrix.getRate(currencyFrom, currencyTo);
             Balance balanceFrom = currencyToNewBalance.computeIfAbsent(currencyFrom, (c) -> new Balance(session.getId(), nextDate, currencyFrom, 0));
-            double newAmountForCurrencyFrom = balanceFrom.getAmount() - amount;
-            if(newAmountForCurrencyFrom < 0)
-                throw new IllegalStateException("Balance amount cannot be negative");
+            double newAmountForCurrencyFrom = Math.max(balanceFrom.getAmount() - amount, 0);
             balanceFrom.setAmount(newAmountForCurrencyFrom);
             Balance balanceTo = currencyToNewBalance.computeIfAbsent(currencyTo, (c) -> new Balance(session.getId(), nextDate, currencyTo, 0));
             balanceTo.setAmount(balanceTo.getAmount() + amount * rate / (1 + session.getCommissionRate()));
