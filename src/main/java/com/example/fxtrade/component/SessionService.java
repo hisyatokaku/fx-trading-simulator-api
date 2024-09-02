@@ -58,13 +58,17 @@ public class SessionService {
         for (ExchangeRequest exchangeRequest: exchangeRequests) {
             String currencyFrom = exchangeRequest.getCurrencyFrom();
             String currencyTo = exchangeRequest.getCurrencyTo();
+            // In case of negative amount, change it to 0
             double amount = Math.max(exchangeRequest.getAmount(), 0);
             double rate = rateMatrix.getRate(currencyFrom, currencyTo);
             Balance balanceFrom = currencyToNewBalance.computeIfAbsent(currencyFrom, (c) -> new Balance(session.getId(), nextDate, currencyFrom, 0));
+            // in case when amount in exchange request > balance in DB, make it 0
+            // This is to avoid negative value in db and address double precision issue.
             double newAmountForCurrencyFrom = Math.max(balanceFrom.getAmount() - amount, 0);
+            double diffAmount = balanceFrom.getAmount() - newAmountForCurrencyFrom;
             balanceFrom.setAmount(newAmountForCurrencyFrom);
             Balance balanceTo = currencyToNewBalance.computeIfAbsent(currencyTo, (c) -> new Balance(session.getId(), nextDate, currencyTo, 0));
-            balanceTo.setAmount(balanceTo.getAmount() + amount * rate / (1 + session.getCommissionRate()));
+            balanceTo.setAmount(balanceTo.getAmount() + diffAmount * rate / (1 + session.getCommissionRate()));
         }
 
         RateMatrix nextDateRateMatrix = RateMatrix.newWith(nextDate);
