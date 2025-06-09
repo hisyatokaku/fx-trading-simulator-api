@@ -1,0 +1,15 @@
+--- a/.github/workflows/deploy-to-azure.yml
++++ b/.github/workflows/deploy-to-azure.yml
+@@ -8,9 +8,9 @@ on:
+     branches: [ main, master ]
+ 
+ env:
+-  AZURE_WEBAPP_NAME: fxtrade-app    # set this to your application's name
+-  AZURE_WEBAPP_PACKAGE_PATH: '.'   # set this to the path to your web app project, defaults to the repository root
+-  JAVA_VERSION: '17'               # set this to the Java version to use
++  AZURE_WEBAPP_NAME: fx-simulator    # Your Azure Web App name
++  AZURE_WEBAPP_PACKAGE_PATH: '.'     # set this to the path to your web app project, defaults to the repository root
++  JAVA_VERSION: '17'                 # set this to the Java version to use
+ 
+ jobs:
+   build:
