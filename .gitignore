@@ -38,3 +38,4 @@ out/
 
 ### Generated java files ###
 src/main/generated-java
+.env
