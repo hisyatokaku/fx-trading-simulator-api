@@ -190,3 +190,6 @@ docker logs -f fx-trading-simulator-api-app-1
 1. このREADMEのトラブルシューティングセクションを確認
 2. Docker DesktopとVS Codeが最新版であることを確認
 3. プロジェクトのIssueトラッカーで報告
+
+## メモ
+- [ipynbファイルのドラフト](https://colab.research.google.com/drive/1bMMEPs1mdKaC01h47g1EjElFsPoWDnm8?usp=sharing)
