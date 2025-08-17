@@ -4,10 +4,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=postgresql
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/fxtrade
-      - SPRING_DATASOURCE_USERNAME=fxuser
-      - SPRING_DATASOURCE_PASSWORD=fxpassword
+      # ローカル開発環境のプロファイルを使用
+      - SPRING_PROFILES_ACTIVE=local
+      # 本番環境にデプロイする場合は以下に変更:
+      # - SPRING_PROFILES_ACTIVE=production
     depends_on:
       db:
         condition: service_healthy

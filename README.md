@@ -167,6 +167,51 @@ docker logs -f fx-trading-simulator-api-app-1
 ./gradlew build --info --stacktrace
 ```
 
+## データベースとデータ投入について
+
+### 初期データの自動投入
+
+アプリケーション起動時に、以下のデータが自動的にデータベースに投入されます：
+
+#### 1. 為替レートデータ
+- **データソース**: `src/main/resources/data/rates.csv`
+- **期間**: 2002年4月〜現在（約20年分）
+- **通貨数**: 23通貨（USD, EUR, GBP等）
+- **レコード数**: 約127,000件
+- **投入条件**: テーブルが空の場合のみ実行
+
+#### 2. トレーダーデータ  
+- **データソース**: `src/main/resources/data/traders.csv`
+- **レコード数**: 102件
+- **投入方式**: 毎回全削除→再投入
+
+### データ投入の確認方法
+
+```bash
+# データベース接続してレコード数確認
+docker exec fx-trading-simulator-api-db-1 psql -U fxuser -d fxtrade -c "SELECT COUNT(*) FROM rate;"
+docker exec fx-trading-simulator-api-db-1 psql -U fxuser -d fxtrade -c "SELECT COUNT(*) FROM trader;"
+
+# アプリケーションログで投入状況確認
+docker logs fx-trading-simulator-api-app-1 | grep -E "(Setting up|already initialized)"
+```
+
+### 初回セットアップ時の注意
+
+テーブルが自動作成されない場合は、以下のSQLを手動実行してください：
+```sql
+-- PostgreSQLに接続
+docker exec -it fx-trading-simulator-api-db-1 psql -U fxuser -d fxtrade
+
+-- テーブル作成
+CREATE TABLE rate (currency varchar(255), date_d date, rate float8);
+CREATE TABLE trader (user_id varchar(255), type_c varchar(255));
+CREATE TABLE session (id int, user_id varchar(255), start_date date, c_date date, end_date date, is_complete boolean, scenario varchar(255), jpy_amount float8, commission_rate float8);
+CREATE TABLE balance (session_id int, date_d date, currency varchar(255), amount float8);
+```
+
+詳細なデータベース設計とデータ投入フローについては、[CLAUDE.md](./CLAUDE.md) を参照してください。
+
 ## APIエンドポイント
 
 アプリケーション起動後、以下のようなエンドポイントが利用可能です：

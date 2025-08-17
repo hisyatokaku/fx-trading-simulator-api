@@ -35,9 +35,13 @@ public class RateMatrix {
                 if (currencyFrom.equals(currencyTo)) {
                     continue;
                 }
-                double jpyRateForFromCurrency = currencyFromAndToToRate.get(Tuples.twin(currencyFrom, Currency.JPY.name()));
-                double jpyRateForToCurrency = currencyFromAndToToRate.get(Tuples.twin(currencyTo, Currency.JPY.name()));
-                currencyFromAndToToRate.put(Tuples.twin(currencyFrom, currencyTo), jpyRateForFromCurrency / jpyRateForToCurrency);
+                Double jpyRateForFromCurrency = currencyFromAndToToRate.get(Tuples.twin(currencyFrom, Currency.JPY.name()));
+                Double jpyRateForToCurrency = currencyFromAndToToRate.get(Tuples.twin(currencyTo, Currency.JPY.name()));
+                
+                // null check for missing rate data
+                if (jpyRateForFromCurrency != null && jpyRateForToCurrency != null) {
+                    currencyFromAndToToRate.put(Tuples.twin(currencyFrom, currencyTo), jpyRateForFromCurrency / jpyRateForToCurrency);
+                }
             }
         }
 
@@ -45,7 +49,8 @@ public class RateMatrix {
     }
 
     public double getRate(String currencyFrom, String currencyTo) {
-        return currencyFromAndToToRate.get(Tuples.twin(currencyFrom, currencyTo));
+        Double rate = currencyFromAndToToRate.get(Tuples.twin(currencyFrom, currencyTo));
+        return rate != null ? rate : 0.0;
     }
 
     public Set<Twin<String>> getCurrencyFromAndTo() {

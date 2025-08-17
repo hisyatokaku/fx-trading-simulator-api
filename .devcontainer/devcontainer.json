@@ -33,7 +33,7 @@
       }
     }
   },
-  "forwardPorts": [8080, 5432],
+  "forwardPorts": [8080],
   "postCreateCommand": "./gradlew build",
   "remoteUser": "root"
 }
