@@ -212,6 +212,59 @@ CREATE TABLE balance (session_id int, date_d date, currency varchar(255), amount
 
 詳細なデータベース設計とデータ投入フローについては、[CLAUDE.md](./CLAUDE.md) を参照してください。
 
+## CORS設定とフロントエンド連携
+
+### 重要: CORS設定は必須
+
+**ブラウザからJavaScript（fetch/axios）でAPIを呼び出す場合、バックエンドでのCORS設定が必須**です。
+
+#### なぜ必要？
+- ブラウザのセキュリティ機能（Same-Origin Policy）による制限
+- フロントエンド（localhost:5173）とバックエンド（localhost:8080）は異なるオリジン
+- フロントエンド側では解決不可能 - **バックエンド設定が必要**
+
+### 環境別CORS設定
+
+システムは環境別にCORS設定を自動管理します：
+
+#### ローカル開発
+- **許可オリジン**: `http://localhost:5173`, `http://localhost:3000`, `http://127.0.0.1:5173`
+- **設定ファイル**: `application-local.properties`
+
+#### 本番環境
+- **許可オリジン**: `https://your-production-domain.com`
+- **設定ファイル**: `application-production.properties`
+- **要設定**: 本番デプロイ前にフロントエンドの実際のURLに変更
+
+### 本番デプロイ時の必須作業
+
+```properties
+# application-production.propertiesの更新
+cors.allowed-origins[0]=https://your-actual-frontend-domain.com
+cors.allowed-origins[1]=https://www.your-actual-frontend-domain.com
+```
+
+### CORS関連のトラブルシューティング
+
+#### よくあるエラー
+```
+Access to fetch at 'http://localhost:8080/api/trade/sessions/userId/rocky' 
+from origin 'http://localhost:5173' has been blocked by CORS policy
+```
+
+#### 解決方法
+1. **設定確認**: CORS設定が正しく設定されているか確認
+2. **再ビルド**: 設定変更後は必ずDockerコンテナを再ビルド
+   ```bash
+   docker-compose down && docker-compose up --build -d
+   ```
+3. **ブラウザ確認**: デベロッパーツールでCORSヘッダーを確認
+
+#### 開発時の注意点
+- フロントエンドの開発サーバーポート変更時は設定ファイルも更新
+- 新しいHTTPメソッドや特殊なヘッダーを使用する場合は設定を追加
+- **設定変更後は必ずコンテナ再ビルド**
+
 ## APIエンドポイント
 
 アプリケーション起動後、以下のようなエンドポイントが利用可能です：

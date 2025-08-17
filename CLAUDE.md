@@ -191,3 +191,130 @@ docker exec fx-trading-simulator-api-db-1 psql -U fxuser -d fxtrade -c "SELECT C
    ```
 
 4. **データ投入のカスタマイズ**: 初期化ロジックの変更は`RateInitializer.java`, `TraderInitializer.java`を編集
+
+## CORS設定とフロントエンド連携
+
+### CORS設定の重要性
+
+**CORS（Cross-Origin Resource Sharing）設定は、ブラウザからのAPI呼び出しに必須**です。
+
+#### なぜCORS設定が必要？
+- ブラウザのセキュリティ機能（Same-Origin Policy）によるもの
+- フロントエンド（localhost:5173）からバックエンド（localhost:8080）への異なるオリジン間通信を制限
+- **フロントエンド側では解決できない問題** - バックエンドでの設定が必須
+
+### 環境別CORS設定
+
+現在のシステムでは環境別にCORS設定を管理しています：
+
+#### ローカル開発環境（application-local.properties）
+```properties
+# CORS Configuration for Local Development
+cors.allowed-origins[0]=http://localhost:5173
+cors.allowed-origins[1]=http://localhost:3000
+cors.allowed-origins[2]=http://127.0.0.1:5173
+cors.allowed-methods[0]=GET
+cors.allowed-methods[1]=POST
+cors.allowed-methods[2]=PUT
+cors.allowed-methods[3]=DELETE
+cors.allowed-methods[4]=OPTIONS
+cors.allowed-methods[5]=PATCH
+cors.allowed-headers[0]=*
+cors.allow-credentials=false
+cors.max-age=3600
+```
+
+#### 本番環境（application-production.properties）
+```properties
+# CORS Configuration for Production
+cors.allowed-origins[0]=https://your-production-frontend.com
+cors.allowed-origins[1]=https://yourdomain.com
+cors.allowed-methods[0]=GET
+cors.allowed-methods[1]=POST
+cors.allowed-methods[2]=PUT
+cors.allowed-methods[3]=DELETE
+cors.allowed-methods[4]=OPTIONS
+cors.allowed-headers[0]=Content-Type
+cors.allowed-headers[1]=Authorization
+cors.allowed-headers[2]=X-Requested-With
+cors.allow-credentials=false
+cors.max-age=3600
+```
+
+### CORS設定の構成要素
+
+#### 1. 設定クラス（CorsProperties.java）
+- プロパティファイルからCORS設定を読み込み
+- 環境別設定の動的管理
+
+#### 2. サービスクラス（CorsService.java）
+- 動的なCORSヘッダー生成
+- オリジン検証ロジック
+
+#### 3. コントローラー設定
+- 全APIエンドポイントにCORSヘッダーを追加
+- OPTIONSリクエスト（プリフライト）の処理
+
+### 本番環境デプロイ時の設定手順
+
+#### 1. フロントエンドURLの更新
+```properties
+# application-production.propertiesで本番URLを設定
+cors.allowed-origins[0]=https://your-actual-domain.com
+cors.allowed-origins[1]=https://www.your-actual-domain.com
+```
+
+#### 2. セキュリティ設定の調整
+```properties
+# 本番環境では必要最小限に制限
+cors.allowed-headers[0]=Content-Type
+cors.allowed-headers[1]=Authorization
+cors.allow-credentials=false  # 必要に応じてtrue
+```
+
+#### 3. デプロイ確認方法
+```bash
+# ブラウザのデベロッパーツールでCORSエラーがないことを確認
+# ネットワークタブでOPTIONSリクエストが成功していることを確認
+```
+
+### トラブルシューティング
+
+#### CORSエラーが発生する場合
+
+1. **設定確認**
+   ```bash
+   # 設定ファイルの内容確認
+   grep -A 10 "cors.allowed-origins" src/main/resources/application-*.properties
+   ```
+
+2. **再ビルド**
+   ```bash
+   # 設定変更後は必ず再ビルド
+   docker-compose down && docker-compose up --build -d
+   ```
+
+3. **ブラウザでの確認**
+   - デベロッパーツールのNetworkタブでCORSヘッダーを確認
+   - Consoleタブでエラーメッセージを確認
+
+#### よくあるCORSエラー
+
+1. **"Access to fetch has been blocked by CORS policy"**
+   - 原因: バックエンドでCORS設定されていない
+   - 解決: CORS設定の追加・確認
+
+2. **"header contains multiple values, but only one is allowed"**
+   - 原因: 複数のCORS設定が重複
+   - 解決: 設定の重複排除（現システムでは解決済み）
+
+3. **"Method XXX is not allowed by Access-Control-Allow-Methods"**
+   - 原因: HTTPメソッドが許可されていない
+   - 解決: `cors.allowed-methods`にメソッド追加
+
+### 開発時の注意事項
+
+1. **フロントエンド開発サーバーのポート変更時**: `application-local.properties`も更新
+2. **新しいHTTPメソッド追加時**: `cors.allowed-methods`に追加
+3. **新しいHTTPヘッダー使用時**: `cors.allowed-headers`に追加
+4. **設定変更後**: 必ずDockerコンテナの再ビルドを実行
