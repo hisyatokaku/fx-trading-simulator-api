@@ -160,6 +160,43 @@ async def test_trade_on_completed_session(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_advance_into_missing_rate_gap(client: AsyncClient):
+    """Advancing into a timestamp with no rate data should 404, not crash with a 500."""
+    await client.post(
+        "/api/scenario/",
+        json={
+            "name": "GAP_TEST",
+            "start_datetime": "2016-01-04T00:00:00",
+            "end_datetime": "2016-01-06T00:00:00",
+            "time_interval_seconds": 86400,
+            "initial_balance": 1000000,
+        }
+    )
+    # Only seed a rate for the start day, not for the next step.
+    await client.post(
+        "/api/rate/bulk",
+        json={"rates": [{"currency": "USD", "timestamp": "2016-01-04T00:00:00", "rate_to_jpy": "118.25"}]}
+    )
+
+    start_response = await client.post("/api/trade/start/GAP_TEST/gap_trader")
+    session_id = start_response.json()["id"]
+
+    # First call succeeds using day-1 rates, then advances current_datetime to day 2.
+    first = await client.post(
+        "/api/trade/next",
+        json={"session_id": session_id, "exchange_requests": []}
+    )
+    assert first.status_code == 200
+
+    # Second call needs day-2 rates, which were never seeded.
+    second = await client.post(
+        "/api/trade/next",
+        json={"session_id": session_id, "exchange_requests": []}
+    )
+    assert second.status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_get_session(client: AsyncClient):
     """Test getting session details."""
     await setup_scenario_and_rates(client, "GET_SESSION_TEST")

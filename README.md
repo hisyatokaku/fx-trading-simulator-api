@@ -34,14 +34,11 @@ cp .env.example .env
 alembic upgrade head
 ```
 
-### 5. Seed data
+### 5. Generate rates CSV
 
 ```bash
-# Generate rate CSV (daily + hourly + 5-min for 2016)
+# Generates data/rates.csv (daily + hourly + 5-min for 2016)
 python scripts/generate_rates.py
-
-# Load scenarios, rates and traders into the DB
-python scripts/init_db.py
 ```
 
 ### 6. Start server
@@ -51,6 +48,13 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 API docs available at `http://localhost:8000/docs`
+
+### 7. Seed data
+
+```bash
+# Upserts scenarios.csv, traders.csv and rates.csv via the live API
+python scripts/seed_data.py
+```
 
 ---
 
@@ -108,7 +112,6 @@ fxtrade-api/
 ├── document/                # Participant guide (Jupyter notebook)
 ├── scripts/
 │   ├── generate_rates.py    # Generate rates.csv with intra-day data
-│   ├── init_db.py           # Seed local DB from CSV files (direct DB writes)
 │   ├── seed_data.py         # Upsert scenarios/traders/rates via the live API
 │   └── verify_scenario.py   # End-to-end correctness test
 └── tests/                   # pytest test suite

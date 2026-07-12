@@ -35,14 +35,19 @@ export DATABASE_URL_SYNC=postgresql://fxtrade:fxtrade@localhost:5432/fxtrade
 alembic upgrade head
 ```
 
-### 5. Initialize Sample Data
+### 5. Generate Rates CSV
 ```bash
-python scripts/init_db.py
+python scripts/generate_rates.py
 ```
 
 ### 6. Start Server
 ```bash
 uvicorn app.main:app --reload --port 8000
+```
+
+### 7. Seed Sample Data
+```bash
+python scripts/seed_data.py
 ```
 
 ## Production (Railway)

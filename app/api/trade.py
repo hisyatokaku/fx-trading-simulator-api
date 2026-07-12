@@ -110,6 +110,11 @@ async def execute_next(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+    except RuntimeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
 
     # Get updated balances
     balances = await session_service.get_current_balances(session)
