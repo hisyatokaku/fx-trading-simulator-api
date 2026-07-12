@@ -2,6 +2,7 @@ stages:
   - test
   - build
   - deploy
+  - seed
 
 variables:
   POSTGRES_DB: fxtrade
@@ -53,6 +54,21 @@ deploy:
     url: https://app-production-7488.up.railway.app
   script:
     - npx --yes @railway/cli up --service app --environment production --project $RAILWAY_PROJECT_ID -c --yes -m "CI deploy $CI_COMMIT_SHORT_SHA"
+  when: manual
+  only:
+    - main
+
+# ── Seed / upsert traders.csv & rates.csv into production ──────────────────────
+
+seed_data:
+  stage: seed
+  image: python:3.12-slim
+  variables:
+    API_BASE_URL: https://app-production-7488.up.railway.app
+  before_script:
+    - pip install httpx
+  script:
+    - python scripts/seed_data.py
   when: manual
   only:
     - main

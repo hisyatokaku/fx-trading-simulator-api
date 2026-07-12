@@ -45,6 +45,12 @@ python scripts/init_db.py
 uvicorn app.main:app --reload --port 8000
 ```
 
+## Production (Railway)
+- Swagger UI: https://app-production-7488.up.railway.app/docs
+- Migrations run automatically on every deploy via `startCommand` in `railway.toml`: `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Manual migration without a full deploy: `RAILWAY_TOKEN=<project-token> npx @railway/cli run --service app --environment production alembic upgrade head`
+- Deploys are triggered manually from the GitLab pipeline's `deploy` stage (main branch only)
+
 ## API Endpoints
 
 ### Scenario API (`/api/scenario`)

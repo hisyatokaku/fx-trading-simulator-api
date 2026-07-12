@@ -4,6 +4,7 @@ from app.schemas.scenario import ScenarioCreate, ScenarioUpdate, ScenarioRespons
 from app.schemas.session import SessionResponse, SessionListResponse
 from app.schemas.trade import ExchangeRequest, TradeRequest, TradeResponse
 from app.schemas.rate import RateResponse, RateBulkUpload, RateEntry
+from app.schemas.trader import TraderEntry, TraderBulkUpload, TraderBulkResponse
 
 __all__ = [
     "ScenarioCreate",
@@ -17,4 +18,7 @@ __all__ = [
     "RateResponse",
     "RateBulkUpload",
     "RateEntry",
+    "TraderEntry",
+    "TraderBulkUpload",
+    "TraderBulkResponse",
 ]

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import init_db
-from app.api import trade, rate, scenario
+from app.api import trade, rate, scenario, trader
 
 settings = get_settings()
 
@@ -42,6 +42,7 @@ app.add_middleware(
 app.include_router(trade.router, prefix=f"{settings.api_prefix}/trade", tags=["Trade"])
 app.include_router(rate.router, prefix=f"{settings.api_prefix}/rate", tags=["Rate"])
 app.include_router(scenario.router, prefix=f"{settings.api_prefix}/scenario", tags=["Scenario"])
+app.include_router(trader.router, prefix=f"{settings.api_prefix}/trader", tags=["Trader"])
 
 
 @app.get("/")

@@ -62,6 +62,24 @@ docker compose up --build
 
 ---
 
+## Production (Railway)
+
+Swagger UI: https://app-production-7488.up.railway.app/docs
+
+Migrations run automatically on every deploy, as part of the `startCommand` in `railway.toml`:
+
+```bash
+alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+To run a migration manually against production without a full deploy:
+
+```bash
+RAILWAY_TOKEN=<project-token> npx @railway/cli run --service app --environment production alembic upgrade head
+```
+
+---
+
 ## Project Structure
 
 ```
