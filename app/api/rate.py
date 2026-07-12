@@ -18,7 +18,7 @@ async def get_rates(
     timestamp: str,
     db: AsyncSession = Depends(get_db)
 ):
-    """Get exchange rates for a timestamp. Returns 500 if no rates exist at that exact timestamp."""
+    """Get exchange rates for a timestamp. Returns 404 if no rates exist at that exact timestamp."""
     try:
         dt = parse_datetime(timestamp)
     except Exception:
@@ -33,7 +33,7 @@ async def get_rates(
         rates = await service.get_rates_at_timestamp(dt)
     except RuntimeError as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
 

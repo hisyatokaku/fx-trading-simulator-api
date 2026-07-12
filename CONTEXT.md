@@ -50,6 +50,7 @@ uvicorn app.main:app --reload --port 8000
 - Migrations run automatically on every deploy via `startCommand` in `railway.toml`: `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - Manual migration without a full deploy: `RAILWAY_TOKEN=<project-token> npx @railway/cli run --service app --environment production alembic upgrade head`
 - Deploys are triggered manually from the GitLab pipeline's `deploy` stage (main branch only)
+- `traders.csv`/`rates.csv` are seeded independently of migrations via `scripts/seed_data.py`, which upserts through the live API (`/api/trader/bulk`, `/api/rate/bulk`) rather than the DB directly — re-run anytime the CSVs change, no new migration needed. Manual: `python scripts/seed_data.py https://app-production-7488.up.railway.app`. In CI: the manual `seed_data` job (`seed` stage) on `main`.
 
 ## API Endpoints
 
@@ -65,8 +66,7 @@ uvicorn app.main:app --reload --port 8000
 ### Rate API (`/api/rate`)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/{timestamp}` | Get rates at timestamp |
-| GET | `/{timestamp}?nearest=true` | Get nearest available rates |
+| GET | `/{timestamp}` | Get rates at exact timestamp (404 if none) |
 | POST | `/bulk` | Bulk upload rates |
 
 ### Trade API (`/api/trade`)
@@ -172,7 +172,7 @@ pytest tests/ --cov=app --cov-report=html
 
 ### Rate Lookup
 - Rates are stored with timestamps
-- When querying, uses nearest available rate <= current time
+- Querying requires an exact timestamp match; trades fail if no rate exists at `current_datetime`
 
 ### Trading Flow
 1. Create a scenario with time range and interval

@@ -78,6 +78,16 @@ To run a migration manually against production without a full deploy:
 RAILWAY_TOKEN=<project-token> npx @railway/cli run --service app --environment production alembic upgrade head
 ```
 
+### Seeding traders.csv / rates.csv
+
+Data seeding is independent of migrations, and can be re-run anytime data/*.csv changes — it upserts via the live API (`/api/trader/bulk`, `/api/rate/bulk`), not the database directly, so it never gets out of sync with a schema change:
+
+```bash
+python scripts/seed_data.py https://app-production-7488.up.railway.app
+```
+
+In GitLab CI, this is the manual `seed_data` job (`seed` stage) on `main`.
+
 ---
 
 ## Project Structure

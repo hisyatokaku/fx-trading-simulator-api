@@ -78,23 +78,3 @@ async def test_get_rates_not_found(client: AsyncClient):
     """Test getting rates for non-existent timestamp."""
     response = await client.get("/api/rate/2020-01-01T00:00:00")
     assert response.status_code == 404
-
-
-@pytest.mark.asyncio
-async def test_get_rates_nearest(client: AsyncClient):
-    """Test getting nearest available rates."""
-    # Upload rates for specific timestamp
-    await client.post(
-        "/api/rate/bulk",
-        json={
-            "rates": [
-                {"currency": "USD", "timestamp": "2016-01-07T00:00:00", "rate_to_jpy": "118.25"},
-            ]
-        }
-    )
-
-    # Get nearest rates for a later timestamp
-    response = await client.get("/api/rate/2016-01-07T12:00:00?nearest=true")
-    assert response.status_code == 200
-    data = response.json()
-    assert "USD" in data["rates"]
