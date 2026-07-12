@@ -1,0 +1,43 @@
+stages:
+  - test
+  - build
+
+variables:
+  POSTGRES_DB: fxtrade
+  POSTGRES_USER: fxtrade
+  POSTGRES_PASSWORD: fxtrade
+  DATABASE_URL: "postgresql+asyncpg://fxtrade:fxtrade@postgres:5432/fxtrade"
+  DATABASE_URL_SYNC: "postgresql://fxtrade:fxtrade@postgres:5432/fxtrade"
+
+# ── Test ─────────────────────────────────────────────────────────────────────
+
+test:
+  stage: test
+  image: python:3.12-slim
+  services:
+    - name: postgres:15
+      alias: postgres
+  before_script:
+    - pip install -r requirements.txt
+    - alembic upgrade head
+  script:
+    - pytest tests/ -v --tb=short
+  coverage: '/TOTAL.*\s+(\d+%)$/'
+
+# ── Build Docker image ────────────────────────────────────────────────────────
+
+build:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $IMAGE .
+    - docker push $IMAGE
+  only:
+    - main
+    - tags
