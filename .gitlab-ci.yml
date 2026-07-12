@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - deploy
 
 variables:
   POSTGRES_DB: fxtrade
@@ -41,3 +42,17 @@ build:
   only:
     - main
     - tags
+
+# ── Deploy to Railway ──────────────────────────────────────────────────────────
+
+deploy:
+  stage: deploy
+  image: node:20-slim
+  environment:
+    name: production
+    url: https://app-production-7488.up.railway.app
+  script:
+    - npx --yes @railway/cli up --service app --environment production --project $RAILWAY_PROJECT_ID -c --yes -m "CI deploy $CI_COMMIT_SHORT_SHA"
+  when: manual
+  only:
+    - main
