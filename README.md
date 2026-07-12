@@ -65,7 +65,7 @@ docker compose up --build
 ## Project Structure
 
 ```
-fxtrade-server/
+fxtrade-api/
 ├── app/
 │   ├── main.py              # FastAPI entry point
 │   ├── config.py            # Settings (env vars)

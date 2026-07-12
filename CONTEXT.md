@@ -127,7 +127,7 @@ curl -X POST http://localhost:8000/api/trade/next \
 
 ## Project Structure
 ```
-fxtrade-server/
+fxtrade-api/
 ├── app/
 │   ├── main.py              # FastAPI entry point
 │   ├── config.py            # Settings
