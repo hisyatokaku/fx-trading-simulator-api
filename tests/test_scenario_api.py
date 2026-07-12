@@ -152,3 +152,79 @@ async def test_delete_scenario(client: AsyncClient):
     # Verify it's gone
     response = await client.get("/api/scenario/DELETE_TEST")
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_bulk_upload_scenarios(client: AsyncClient):
+    """Test bulk uploading scenarios."""
+    response = await client.post(
+        "/api/scenario/bulk",
+        json={
+            "scenarios": [
+                {
+                    "name": "BULK_A",
+                    "start_datetime": "2016-01-04T00:00:00",
+                    "end_datetime": "2016-12-30T00:00:00",
+                    "time_interval_seconds": 86400,
+                    "game_type": "ANY",
+                    "initial_balance": 1000000,
+                },
+                {
+                    "name": "BULK_B",
+                    "start_datetime": "2016-01-04T09:00:00",
+                    "end_datetime": "2016-01-04T17:00:00",
+                    "time_interval_seconds": 300,
+                    "game_type": "ANY",
+                    "initial_balance": 1000000,
+                },
+            ]
+        }
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["inserted"] == 2
+    assert data["updated"] == 0
+
+
+@pytest.mark.asyncio
+async def test_bulk_upload_scenarios_update(client: AsyncClient):
+    """Test bulk upload updates an existing scenario's fields."""
+    await client.post(
+        "/api/scenario/bulk",
+        json={
+            "scenarios": [
+                {
+                    "name": "BULK_UPDATE",
+                    "start_datetime": "2016-01-04T00:00:00",
+                    "end_datetime": "2016-12-30T00:00:00",
+                    "time_interval_seconds": 86400,
+                    "game_type": "ANY",
+                    "initial_balance": 1000000,
+                },
+            ]
+        }
+    )
+
+    response = await client.post(
+        "/api/scenario/bulk",
+        json={
+            "scenarios": [
+                {
+                    "name": "BULK_UPDATE",
+                    "start_datetime": "2016-01-04T00:00:00",
+                    "end_datetime": "2016-12-30T00:00:00",
+                    "time_interval_seconds": 3600,
+                    "game_type": "ANY",
+                    "initial_balance": 500000,
+                },
+            ]
+        }
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["inserted"] == 0
+    assert data["updated"] == 1
+
+    updated = await client.get("/api/scenario/BULK_UPDATE")
+    assert updated.json()["time_interval_seconds"] == 3600
+    assert updated.json()["initial_balance"] == 500000

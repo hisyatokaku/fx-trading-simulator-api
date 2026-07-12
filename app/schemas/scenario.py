@@ -30,6 +30,25 @@ class ScenarioCreate(ScenarioBase):
     pass
 
 
+class ScenarioEntry(ScenarioBase):
+    """Single scenario entry for bulk upsert."""
+
+    pass
+
+
+class ScenarioBulkUpload(BaseModel):
+    """Bulk scenario upload request."""
+
+    scenarios: List[ScenarioEntry]
+
+
+class ScenarioBulkResponse(BaseModel):
+    """Response after bulk scenario upload."""
+
+    inserted: int
+    updated: int
+
+
 class ScenarioUpdate(BaseModel):
     """Schema for updating a scenario."""
 

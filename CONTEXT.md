@@ -50,7 +50,7 @@ uvicorn app.main:app --reload --port 8000
 - Migrations run automatically on every deploy via `startCommand` in `railway.toml`: `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - Manual migration without a full deploy: `RAILWAY_TOKEN=<project-token> npx @railway/cli run --service app --environment production alembic upgrade head`
 - Deploys are triggered manually from the GitLab pipeline's `deploy` stage (main branch only)
-- `traders.csv`/`rates.csv` are seeded independently of migrations via `scripts/seed_data.py`, which upserts through the live API (`/api/trader/bulk`, `/api/rate/bulk`) rather than the DB directly — re-run anytime the CSVs change, no new migration needed. Manual: `python scripts/seed_data.py https://app-production-7488.up.railway.app`. In CI: the manual `seed_data` job (`seed` stage) on `main`.
+- `scenarios.csv`/`traders.csv`/`rates.csv` are seeded independently of migrations via `scripts/seed_data.py`, which upserts through the live API (`/api/scenario/bulk`, `/api/trader/bulk`, `/api/rate/bulk`) rather than the DB directly — re-run anytime the CSVs change, no new migration needed. Manual: `python scripts/seed_data.py https://app-production-7488.up.railway.app`. In CI: the manual `seed_data` job (`seed` stage) on `main`.
 
 ## API Endpoints
 
@@ -59,7 +59,8 @@ uvicorn app.main:app --reload --port 8000
 |--------|----------|-------------|
 | GET | `/` | List all scenarios |
 | GET | `/{name}` | Get scenario by name |
-| POST | `/` | Create new scenario |
+| POST | `/` | Create new scenario (409 if name exists) |
+| POST | `/bulk` | Bulk upsert scenarios, keyed by name |
 | PUT | `/{name}` | Update scenario |
 | DELETE | `/{name}` | Delete scenario |
 
@@ -67,7 +68,12 @@ uvicorn app.main:app --reload --port 8000
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/{timestamp}` | Get rates at exact timestamp (404 if none) |
-| POST | `/bulk` | Bulk upload rates |
+| POST | `/bulk` | Bulk upsert rates, keyed by currency+timestamp |
+
+### Trader API (`/api/trader`)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/bulk` | Bulk upsert traders, keyed by user_id |
 
 ### Trade API (`/api/trade`)
 | Method | Endpoint | Description |

@@ -78,9 +78,9 @@ To run a migration manually against production without a full deploy:
 RAILWAY_TOKEN=<project-token> npx @railway/cli run --service app --environment production alembic upgrade head
 ```
 
-### Seeding traders.csv / rates.csv
+### Seeding scenarios.csv / traders.csv / rates.csv
 
-Data seeding is independent of migrations, and can be re-run anytime data/*.csv changes — it upserts via the live API (`/api/trader/bulk`, `/api/rate/bulk`), not the database directly, so it never gets out of sync with a schema change:
+Data seeding is independent of migrations, and can be re-run anytime data/*.csv changes — it upserts via the live API (`/api/scenario/bulk`, `/api/trader/bulk`, `/api/rate/bulk`), not the database directly, so it never gets out of sync with a schema change:
 
 ```bash
 python scripts/seed_data.py https://app-production-7488.up.railway.app
@@ -104,11 +104,12 @@ fxtrade-api/
 │   ├── services/            # Business logic
 │   └── utils/               # RateMatrix, date helpers
 ├── alembic/                 # DB migrations
-├── data/                    # traders.csv (rates.csv is generated)
+├── data/                    # scenarios.csv, traders.csv (rates.csv is generated)
 ├── document/                # Participant guide (Jupyter notebook)
 ├── scripts/
 │   ├── generate_rates.py    # Generate rates.csv with intra-day data
-│   ├── init_db.py           # Seed DB from CSV files
+│   ├── init_db.py           # Seed local DB from CSV files (direct DB writes)
+│   ├── seed_data.py         # Upsert scenarios/traders/rates via the live API
 │   └── verify_scenario.py   # End-to-end correctness test
 └── tests/                   # pytest test suite
 ```
@@ -121,9 +122,11 @@ fxtrade-api/
 |--------|----------|-------------|
 | GET | `/api/scenario/` | List all scenarios |
 | POST | `/api/scenario/` | Create scenario |
+| POST | `/api/scenario/bulk` | Bulk upsert scenarios |
 | POST | `/api/scenario/{id}/check-rates` | Check rate coverage for a scenario |
 | GET | `/api/rate/{datetime}` | Get rates at exact datetime |
-| POST | `/api/rate/bulk` | Bulk upload rates |
+| POST | `/api/rate/bulk` | Bulk upsert rates |
+| POST | `/api/trader/bulk` | Bulk upsert traders |
 | POST | `/api/trade/start/{scenario}/{user_id}` | Start a trading session |
 | POST | `/api/trade/next` | Execute trades and advance time |
 | GET | `/api/trade/session/{session_id}` | Get session details |

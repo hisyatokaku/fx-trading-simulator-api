@@ -6,7 +6,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.schemas.scenario import ScenarioCreate, ScenarioUpdate, ScenarioResponse, RateCheckRequest, RateCheckResponse
+from app.schemas.scenario import (
+    ScenarioCreate,
+    ScenarioUpdate,
+    ScenarioResponse,
+    ScenarioBulkUpload,
+    ScenarioBulkResponse,
+    RateCheckRequest,
+    RateCheckResponse,
+)
 from app.services.scenario_service import ScenarioService
 from app.services.rate_service import RateService
 from app.utils.date_utils import add_interval
@@ -53,6 +61,27 @@ async def create_scenario(
 
     scenario = await service.create(data)
     return scenario
+
+
+@router.post("/bulk", response_model=ScenarioBulkResponse)
+async def bulk_upload_scenarios(
+    data: ScenarioBulkUpload,
+    db: AsyncSession = Depends(get_db)
+):
+    """Bulk upload scenarios.
+
+    Inserts new scenarios or updates existing ones, keyed by name.
+    """
+    service = ScenarioService(db)
+
+    try:
+        inserted, updated = await service.bulk_upsert(data.scenarios)
+        return ScenarioBulkResponse(inserted=inserted, updated=updated)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to upload scenarios: {str(e)}"
+        )
 
 
 @router.put("/{name}", response_model=ScenarioResponse)

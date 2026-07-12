@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-"""Upsert traders.csv and rates.csv into a running instance via its API.
+"""Upsert scenarios.csv, traders.csv, and rates.csv into a running instance via its API.
 
-Safe to run repeatedly: existing rows are updated in place (by user_id
-for traders, by currency+timestamp for rates) via the /api/trader/bulk
-and /api/rate/bulk endpoints. New rows are inserted; rows no longer
-present in the CSVs are left untouched.
+Safe to run repeatedly: existing rows are updated in place (by name for
+scenarios, user_id for traders, currency+timestamp for rates) via the
+/api/scenario/bulk, /api/trader/bulk, and /api/rate/bulk endpoints. New
+rows are inserted; rows no longer present in the CSVs are left untouched.
 
 Usage:
     python scripts/seed_data.py [base_url]
@@ -22,6 +22,36 @@ import httpx
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 CURRENCIES = ["USD", "EUR", "GBP", "AUD", "CHF", "CNY", "HKD"]
+
+
+def load_scenarios(csv_path: Path) -> list[dict]:
+    if not csv_path.exists():
+        return []
+
+    scenarios = []
+    with open(csv_path, "r") as f:
+        for row in csv.DictReader(f):
+            name = (row.get("name") or "").strip()
+            if not name:
+                continue
+
+            start_str = (row.get("start_datetime") or "").strip()
+            end_str = (row.get("end_datetime") or "").strip()
+            try:
+                start_dt = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S")
+                end_dt = datetime.strptime(end_str, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                continue
+
+            scenarios.append({
+                "name": name,
+                "start_datetime": start_dt.isoformat(),
+                "end_datetime": end_dt.isoformat(),
+                "time_interval_seconds": int(row.get("time_interval_seconds") or 86400),
+                "game_type": (row.get("game_type") or "ANY").strip(),
+                "initial_balance": float(row.get("initial_balance") or 1000000.0),
+            })
+    return scenarios
 
 
 def load_traders(csv_path: Path) -> list[dict]:
@@ -73,10 +103,17 @@ def load_rates(csv_path: Path) -> list[dict]:
 def main():
     base_url = (sys.argv[1] if len(sys.argv) > 1 else None) or os.getenv("API_BASE_URL", "http://localhost:8000")
 
+    scenarios = load_scenarios(DATA_DIR / "scenarios.csv")
     traders = load_traders(DATA_DIR / "traders.csv")
     rates = load_rates(DATA_DIR / "rates.csv")
 
     with httpx.Client(base_url=base_url, timeout=60.0) as client:
+        if scenarios:
+            resp = client.post("/api/scenario/bulk", json={"scenarios": scenarios})
+            resp.raise_for_status()
+            result = resp.json()
+            print(f"Scenarios: {result['inserted']} inserted, {result['updated']} updated.")
+
         if traders:
             resp = client.post("/api/trader/bulk", json={"traders": traders})
             resp.raise_for_status()
