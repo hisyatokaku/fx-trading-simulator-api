@@ -105,6 +105,7 @@ async def execute_next(
         session, trade_results, rates = await session_service.execute_trades_and_advance(
             session, request.exchange_requests
         )
+        await db.commit()
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
