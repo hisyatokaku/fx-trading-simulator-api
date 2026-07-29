@@ -13,7 +13,7 @@ import org.eclipse.collections.impl.utility.MapIterate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.util.*;
 
 @Component
@@ -43,10 +43,11 @@ public class SessionService {
             throw new IllegalStateException("Session is complete");
         }
 
-        Date currentDate = session.getCurrentDate();
-        LocalDate currentDateAsLocalDate = DateUtil.toLocalDate(currentDate);
-        LocalDate nextDateAsLocalDate = DateUtil.nextBusinessDate(currentDateAsLocalDate);
-        Date nextDate = DateUtil.toDate(nextDateAsLocalDate);
+        Timestamp currentDate = session.getCurrentDate();
+        Timestamp nextDate = DateUtil.nextAvailableTimestamp(currentDate, Currency.USD.name());
+        if (nextDate == null) {
+            throw new IllegalStateException("No further rate data available after " + currentDate);
+        }
 
         BalanceList currentBalances = BalanceFinder.findMany(BalanceFinder.sessionId().eq(session.getId()).and(BalanceFinder.date().eq(currentDate)));
         Map<String, Balance> currencyToNewBalance = Iterate.toMap(currentBalances, balance -> balance.getCurrency(), balance -> new Balance(session.getId(), nextDate, balance.getCurrency(), balance.getAmount()));

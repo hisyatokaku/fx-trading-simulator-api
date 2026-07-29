@@ -1,6 +1,6 @@
 package com.example.fxtrade.models;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class Rate extends RateAbstract {
     public Rate() {
@@ -9,7 +9,7 @@ public class Rate extends RateAbstract {
         // You can call this constructor. You can also add new constructors.
     }
 
-    public Rate(String currency, Date date, double rateDouble) {
+    public Rate(String currency, Timestamp date, double rateDouble) {
         this();
         this.setCurrency(currency);
         this.setDate(date);

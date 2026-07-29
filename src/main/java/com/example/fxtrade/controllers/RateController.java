@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,9 +20,9 @@ import java.util.Set;
 public class RateController {
 
     @GetMapping("{date}")
-    public Map<String, Double> getRate(@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+    public Map<String, Double> getRate(@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime date) {
         Map<String, Double> currencyPairToRate = Maps.mutable.empty();
-        RateMatrix rateMatrix = RateMatrix.newWith(DateUtil.toDate(date));
+        RateMatrix rateMatrix = RateMatrix.newWith(DateUtil.toTimestamp(date));
         Set<Twin<String>> currencyFromAndTos = rateMatrix.getCurrencyFromAndTo();
         Iterate.forEach(currencyFromAndTos, currencyFromAndTo -> {
             String currencyFrom = currencyFromAndTo.getOne();

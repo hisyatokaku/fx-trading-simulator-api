@@ -6,20 +6,20 @@ import com.example.fxtrade.utils.reladomo.DateUtil;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.impl.utility.Iterate;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public class NextResponse {
     private final int sessionId;
     private final boolean isComplete;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
-    private final LocalDate currentDate;
+    private final LocalDateTime startDate;
+    private final LocalDateTime endDate;
+    private final LocalDateTime currentDate;
     private final double jpyBalance;
     private final Map<String, Double> currencyToBalance;
     private final Map<String, Double> currentDateRates;
 
-    public NextResponse(int sessionId, boolean isComplete, LocalDate startDate, LocalDate endDate, LocalDate currentDate, double jpyBalance, Map<String, Double> currencyToBalance, Map<String, Double> currentDateRates) {
+    public NextResponse(int sessionId, boolean isComplete, LocalDateTime startDate, LocalDateTime endDate, LocalDateTime currentDate, double jpyBalance, Map<String, Double> currencyToBalance, Map<String, Double> currentDateRates) {
         this.sessionId = sessionId;
         this.isComplete = isComplete;
         this.startDate = startDate;
@@ -33,7 +33,7 @@ public class NextResponse {
     public static NextResponse newWith(Session session) {
         BalanceList balances = BalanceFinder.findMany(BalanceFinder.sessionId().eq(session.getId()).and(BalanceFinder.date().eq(session.getCurrentDate())));
         Map<String, Double> currencyToBalance = Iterate.toMap(balances, Balance::getCurrency, Balance::getAmount);
-        RateMatrix rateMatrix = RateMatrix.newWith(DateUtil.toDate(DateUtil.toLocalDate(session.getCurrentDate())));
+        RateMatrix rateMatrix = RateMatrix.newWith(session.getCurrentDate());
         Map<String, Double> currentDateRates = Maps.mutable.empty();
         for (Currency currencyFrom: Currency.values()) {
             for (Currency currencyTo: Currency.values()) {
@@ -43,9 +43,9 @@ public class NextResponse {
             }
         }
         return new NextResponse(session.getId(), session.isIsComplete(),
-                DateUtil.toLocalDate(session.getStartDate()),
-                DateUtil.toLocalDate(session.getEndDate()),
-                DateUtil.toLocalDate(session.getCurrentDate()),
+                DateUtil.toLocalDateTime(session.getStartDate()),
+                DateUtil.toLocalDateTime(session.getEndDate()),
+                DateUtil.toLocalDateTime(session.getCurrentDate()),
                 session.getJpyAmount(), currencyToBalance, currentDateRates);
     }
 
@@ -57,15 +57,15 @@ public class NextResponse {
         return isComplete;
     }
 
-    public LocalDate getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
 
-    public LocalDate getEndDate() {
+    public LocalDateTime getEndDate() {
         return endDate;
     }
 
-    public LocalDate getCurrentDate() {
+    public LocalDateTime getCurrentDate() {
         return currentDate;
     }
 

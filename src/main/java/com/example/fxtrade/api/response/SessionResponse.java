@@ -9,18 +9,18 @@ import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.multimap.Multimap;
 import org.eclipse.collections.impl.utility.Iterate;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public class SessionResponse {
     private final int sessionId;
     private final boolean isComplete;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
+    private final LocalDateTime startDate;
+    private final LocalDateTime endDate;
     private final double jpyBalance;
     private final String scenario;
 
-    public SessionResponse(int sessionId, boolean isComplete, LocalDate startDate, LocalDate endDate, double jpyBalance, String scenario, Map<LocalDate, Map<String, Double>> dateToBalances) {
+    public SessionResponse(int sessionId, boolean isComplete, LocalDateTime startDate, LocalDateTime endDate, double jpyBalance, String scenario, Map<LocalDateTime, Map<String, Double>> dateToBalances) {
         this.sessionId = sessionId;
         this.isComplete = isComplete;
         this.startDate = startDate;
@@ -31,14 +31,14 @@ public class SessionResponse {
 
     public static SessionResponse newWith(Session session) {
         BalanceList balances = BalanceFinder.findMany(BalanceFinder.sessionId().eq(session.getId()));
-        Multimap<LocalDate, Balance> dateBalanceMutableMultimap = Iterate.groupBy(balances, balance -> DateUtil.toLocalDate(balance.getDate()));
-        Map<LocalDate, Map<String, Double>> dateToBalances = Maps.mutable.empty();
+        Multimap<LocalDateTime, Balance> dateBalanceMutableMultimap = Iterate.groupBy(balances, balance -> DateUtil.toLocalDateTime(balance.getDate()));
+        Map<LocalDateTime, Map<String, Double>> dateToBalances = Maps.mutable.empty();
 
         dateBalanceMutableMultimap.forEachKeyMultiValues((date, balancesOnDate) -> {
             Map<String, Double> currencyToBalance = Iterate.toMap(balancesOnDate, Balance::getCurrency, Balance::getAmount);
             dateToBalances.put(date, currencyToBalance);
         });
-        return new SessionResponse(session.getId(), session.isIsComplete(), DateUtil.toLocalDate(session.getStartDate()), DateUtil.toLocalDate(session.getEndDate()), session.getJpyAmount(), session.getScenario(), dateToBalances);
+        return new SessionResponse(session.getId(), session.isIsComplete(), DateUtil.toLocalDateTime(session.getStartDate()), DateUtil.toLocalDateTime(session.getEndDate()), session.getJpyAmount(), session.getScenario(), dateToBalances);
     }
 
     public int getSessionId() {
@@ -49,11 +49,11 @@ public class SessionResponse {
         return isComplete;
     }
 
-    public LocalDate getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
 
-    public LocalDate getEndDate() {
+    public LocalDateTime getEndDate() {
         return endDate;
     }
 
