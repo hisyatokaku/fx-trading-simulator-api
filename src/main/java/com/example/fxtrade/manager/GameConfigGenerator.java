@@ -4,12 +4,10 @@ import com.example.fxtrade.models.GameConfig;
 import com.example.fxtrade.models.Session;
 import com.example.fxtrade.models.Trader;
 import com.example.fxtrade.models.TraderFinder;
-import com.example.fxtrade.models.enums.Currency;
 import com.example.fxtrade.models.enums.GameType;
 import com.example.fxtrade.utils.reladomo.DateUtil;
 import org.eclipse.collections.api.factory.Lists;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -24,20 +22,10 @@ public class GameConfigGenerator {
             throw new IllegalArgumentException("User id is not authorized to run production scenario");
         }
 
-        // シナリオはカレンダー日(LocalDate)の範囲で定義されたまま。実際にティックとして使う
-        // タイムスタンプは、その日付範囲内でRateデータが存在する最初/最後の分足に解決する。
-        Timestamp fromBound = DateUtil.toTimestamp(gameConfig.getDateFrom().atStartOfDay());
-        Timestamp toBound = DateUtil.toTimestamp(gameConfig.getDateTo().atTime(23, 59, 59));
-        Timestamp startTimestamp = DateUtil.firstAvailableTimestampOnOrAfter(fromBound, Currency.USD.name());
-        Timestamp endTimestamp = DateUtil.lastAvailableTimestampOnOrBefore(toBound, Currency.USD.name());
-        if (startTimestamp == null || endTimestamp == null) {
-            throw new IllegalStateException("No rate data available for scenario " + scenario);
-        }
-
         session.setUserId(userId);
-        session.setStartDate(startTimestamp);
-        session.setEndDate(endTimestamp);
-        session.setCurrentDate(startTimestamp);
+        session.setStartDate(DateUtil.toDate(gameConfig.getDateFrom()));
+        session.setEndDate(DateUtil.toDate(gameConfig.getDateTo()));
+        session.setCurrentDate(DateUtil.toDate(gameConfig.getDateFrom()));
         session.setCommissionRate(gameConfig.getCommission());
         session.setScenario(scenario);
     }

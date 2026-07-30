@@ -7,7 +7,7 @@ import org.eclipse.collections.api.tuple.Twin;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ArrayIterate;
 
-import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,7 +19,7 @@ public class RateMatrix {
         this.currencyFromAndToToRate = currencyFromAndToToRate;
     }
 
-    public static RateMatrix newWith(Timestamp date) {
+    public static RateMatrix newWith(Date date) {
         Map<Twin<String>, Double> currencyFromAndToToRate = Maps.mutable.empty();
         RateList rates = RateFinder.findMany(RateFinder.date().eq(date).and(RateFinder.currency().in(Currency.CURRENCIES_AS_STRING)));
         for (Rate rate : rates) {

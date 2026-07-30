@@ -1,7 +1,7 @@
 package com.example.fxtrade.models;
 import com.example.fxtrade.models.enums.Currency;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 public class Balance extends BalanceAbstract
 {
@@ -12,7 +12,7 @@ public class Balance extends BalanceAbstract
 		// You can call this constructor. You can also add new constructors.
 	}
 
-	public Balance(int sessionId, Timestamp date, String currency, double amount)
+	public Balance(int sessionId, Date date, String currency, double amount)
 	{
 		this();
 		this.setSessionId(sessionId);

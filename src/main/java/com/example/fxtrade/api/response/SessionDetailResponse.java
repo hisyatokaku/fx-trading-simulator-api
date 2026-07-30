@@ -9,19 +9,19 @@ import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.multimap.Multimap;
 import org.eclipse.collections.impl.utility.Iterate;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Map;
 
 public class SessionDetailResponse {
     private final int sessionId;
     private final boolean isComplete;
-    private final LocalDateTime startDate;
-    private final LocalDateTime endDate;
+    private final LocalDate startDate;
+    private final LocalDate endDate;
     private final double jpyBalance;
     private final String scenario;
-    private final Map<LocalDateTime, Map<String, Double>> dateToBalances;
+    private final Map<LocalDate, Map<String, Double>> dateToBalances;
 
-    public SessionDetailResponse(int sessionId, boolean isComplete, LocalDateTime startDate, LocalDateTime endDate, double jpyBalance, String scenario, Map<LocalDateTime, Map<String, Double>> dateToBalances) {
+    public SessionDetailResponse(int sessionId, boolean isComplete, LocalDate startDate, LocalDate endDate, double jpyBalance, String scenario, Map<LocalDate, Map<String, Double>> dateToBalances) {
         this.sessionId = sessionId;
         this.isComplete = isComplete;
         this.startDate = startDate;
@@ -33,21 +33,21 @@ public class SessionDetailResponse {
 
     public static SessionDetailResponse newWith(Session session) {
         BalanceList balances = BalanceFinder.findMany(BalanceFinder.sessionId().eq(session.getId()));
-        Multimap<LocalDateTime, Balance> dateBalanceMutableMultimap = Iterate.groupBy(balances, balance -> DateUtil.toLocalDateTime(balance.getDate()));
-        Map<LocalDateTime, Map<String, Double>> dateToBalances = Maps.mutable.empty();
+        Multimap<LocalDate, Balance> dateBalanceMutableMultimap = Iterate.groupBy(balances, balance -> DateUtil.toLocalDate(balance.getDate()));
+        Map<LocalDate, Map<String, Double>> dateToBalances = Maps.mutable.empty();
 
         dateBalanceMutableMultimap.forEachKeyMultiValues((date, balancesOnDate) -> {
             Map<String, Double> currencyToBalance = Iterate.toMap(balancesOnDate, Balance::getCurrency, Balance::getAmount);
             dateToBalances.put(date, currencyToBalance);
         });
-        return new SessionDetailResponse(session.getId(), session.isIsComplete(), DateUtil.toLocalDateTime(session.getStartDate()), DateUtil.toLocalDateTime(session.getEndDate()), session.getJpyAmount(), session.getScenario(), dateToBalances);
+        return new SessionDetailResponse(session.getId(), session.isIsComplete(), DateUtil.toLocalDate(session.getStartDate()), DateUtil.toLocalDate(session.getEndDate()), session.getJpyAmount(), session.getScenario(), dateToBalances);
     }
 
     public int getSessionId() {
         return sessionId;
     }
 
-    public Map<LocalDateTime, Map<String, Double>> getDateToBalances() {
+    public Map<LocalDate, Map<String, Double>> getDateToBalances() {
         return dateToBalances;
     }
 
@@ -55,11 +55,11 @@ public class SessionDetailResponse {
         return isComplete;
     }
 
-    public LocalDateTime getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public LocalDateTime getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
