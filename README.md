@@ -127,7 +127,7 @@ pytest tests/ -v
 
 ```bash
 python scripts/verify_scenario.py                          # DEMO_5MIN (default)
-python scripts/verify_scenario.py DEMO_2016 testuser
+python scripts/verify_scenario.py DEMO_3DAY testuser
 python scripts/verify_scenario.py DEMO_5MIN testuser http://your-server.com
 ```
 

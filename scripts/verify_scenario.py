@@ -7,7 +7,7 @@ Usage:
 
 Examples:
     python scripts/verify_scenario.py
-    python scripts/verify_scenario.py DEMO_2016 testuser
+    python scripts/verify_scenario.py DEMO_3DAY testuser
     python scripts/verify_scenario.py DEMO_5MIN testuser http://localhost:8000
 """
 
