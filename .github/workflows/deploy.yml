@@ -47,5 +47,5 @@ jobs:
               docker compose -p fxtrade-api up -d db
               docker compose -p fxtrade-api run --rm app alembic upgrade head
               docker compose -p fxtrade-api up -d app
-              curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-connrefused http://127.0.0.1:8000/health
+              curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors http://127.0.0.1:8000/health
               docker compose -p fxtrade-api exec -T app python scripts/seed_data.py http://127.0.0.1:8000'
