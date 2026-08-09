@@ -21,7 +21,10 @@ from pathlib import Path
 import httpx
 
 DATA_DIR = Path(__file__).parent.parent / "data"
-CURRENCIES = ["USD", "EUR", "GBP", "AUD", "CHF", "CNY", "HKD"]
+CURRENCIES = [
+    "USD", "EUR", "GBP", "AUD", "NZD", "CAD", "CHF",
+    "TRY", "ZAR", "MXN", "NOK", "SEK", "HKD",
+]
 
 
 def load_scenarios(csv_path: Path) -> list[dict]:
@@ -122,7 +125,7 @@ def main():
 
         if rates:
             # Chunk to keep request payloads reasonable.
-            chunk_size = 500
+            chunk_size = 5000
             total_inserted = total_updated = 0
             for i in range(0, len(rates), chunk_size):
                 chunk = rates[i:i + chunk_size]

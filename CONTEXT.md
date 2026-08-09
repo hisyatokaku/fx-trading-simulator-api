@@ -35,17 +35,12 @@ export DATABASE_URL_SYNC=postgresql://fxtrade:fxtrade@localhost:5432/fxtrade
 alembic upgrade head
 ```
 
-### 5. Generate Rates CSV
-```bash
-python scripts/generate_rates.py
-```
-
-### 6. Start Server
+### 5. Start Server
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 7. Seed Sample Data
+### 6. Seed Sample Data
 ```bash
 python scripts/seed_data.py
 ```
@@ -193,4 +188,4 @@ pytest tests/ --cov=app --cov-report=html
 5. Session completes when `current_datetime >= end_datetime`
 
 ## Supported Currencies
-JPY, USD, EUR, GBP, AUD, CHF, CNY, HKD
+JPY, USD, EUR, GBP, AUD, NZD, CAD, CHF, TRY, ZAR, MXN, NOK, SEK, HKD

@@ -18,7 +18,10 @@ from app.utils.date_utils import add_interval
 
 
 # Supported currencies
-CURRENCIES = ["JPY", "USD", "EUR", "GBP", "AUD", "CHF", "CNY", "HKD"]
+CURRENCIES = [
+    "JPY", "USD", "EUR", "GBP", "AUD", "NZD", "CAD", "CHF",
+    "TRY", "ZAR", "MXN", "NOK", "SEK", "HKD",
+]
 
 
 class SessionService:
