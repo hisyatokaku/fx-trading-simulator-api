@@ -59,38 +59,25 @@ docker compose up --build
 
 ---
 
-## Production (Railway)
+## Production
 
-Swagger UI: https://app-production-7488.up.railway.app/docs
-
-Migrations run automatically on every deploy, as part of the `startCommand` in `railway.toml`:
-
-```bash
-alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
-
-To run a migration manually against production without a full deploy:
-
-```bash
-RAILWAY_TOKEN=<project-token> npx @railway/cli run --service app --environment production alembic upgrade head
-```
+- API: http://34.146.231.219:8000
+- Swagger UI: http://34.146.231.219:8000/docs
 
 ### Seeding scenarios.csv / traders.csv / rates.csv
 
 Data seeding is independent of migrations, and can be re-run anytime data/*.csv changes — it upserts via the live API (`/api/scenario/bulk`, `/api/trader/bulk`, `/api/rate/bulk`), not the database directly, so it never gets out of sync with a schema change:
 
 ```bash
-python scripts/seed_data.py https://app-production-7488.up.railway.app
+python scripts/seed_data.py http://34.146.231.219:8000
 ```
-
-In GitLab CI, this is the manual `seed_data` job (`seed` stage) on `main`.
 
 ---
 
 ## Project Structure
 
 ```
-fxtrade-api/
+fx-trading-simulator-api/
 ├── app/
 │   ├── main.py              # FastAPI entry point
 │   ├── config.py            # Settings (env vars)

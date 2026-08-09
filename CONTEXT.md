@@ -45,12 +45,10 @@ uvicorn app.main:app --reload --port 8000
 python scripts/seed_data.py
 ```
 
-## Production (Railway)
-- Swagger UI: https://app-production-7488.up.railway.app/docs
-- Migrations run automatically on every deploy via `startCommand` in `railway.toml`: `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-- Manual migration without a full deploy: `RAILWAY_TOKEN=<project-token> npx @railway/cli run --service app --environment production alembic upgrade head`
-- Deploys are triggered manually from the GitLab pipeline's `deploy` stage (main branch only)
-- `scenarios.csv`/`traders.csv`/`rates.csv` are seeded independently of migrations via `scripts/seed_data.py`, which upserts through the live API (`/api/scenario/bulk`, `/api/trader/bulk`, `/api/rate/bulk`) rather than the DB directly — re-run anytime the CSVs change, no new migration needed. Manual: `python scripts/seed_data.py https://app-production-7488.up.railway.app`. In CI: the manual `seed_data` job (`seed` stage) on `main`.
+## Production
+- API: http://34.146.231.219:8000
+- Swagger UI: http://34.146.231.219:8000/docs
+- `scenarios.csv`/`traders.csv`/`rates.csv` are seeded independently of migrations via `scripts/seed_data.py`, which upserts through the live API (`/api/scenario/bulk`, `/api/trader/bulk`, `/api/rate/bulk`) rather than the DB directly. Re-run anytime the CSVs change: `python scripts/seed_data.py http://34.146.231.219:8000`.
 
 ## API Endpoints
 
@@ -139,7 +137,7 @@ curl -X POST http://localhost:8000/api/trade/next \
 
 ## Project Structure
 ```
-fxtrade-api/
+fx-trading-simulator-api/
 ├── app/
 │   ├── main.py              # FastAPI entry point
 │   ├── config.py            # Settings
