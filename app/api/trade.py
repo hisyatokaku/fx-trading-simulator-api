@@ -102,7 +102,7 @@ async def execute_next(
     previous_datetime = session.current_datetime
 
     try:
-        session, trade_results, rates = await session_service.execute_trades_and_advance(
+        session, trade_results, rates, balances = await session_service.execute_trades_and_advance(
             session, request.exchange_requests
         )
         await db.commit()
@@ -116,9 +116,6 @@ async def execute_next(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
-
-    # Get updated balances
-    balances = await session_service.get_current_balances(session)
 
     return TradeResponse(
         session_id=session.id,
