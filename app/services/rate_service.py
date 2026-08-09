@@ -47,34 +47,34 @@ class RateService:
         if not entries:
             return 0, 0
 
-        inserted = 0
-        updated = 0
+        # Last occurrence wins, so one statement never touches the same row
+        # twice -- PostgreSQL rejects that in ON CONFLICT DO UPDATE.
+        deduped = {(e.currency, e.timestamp): e for e in entries}
 
-        for entry in entries:
-            # Use PostgreSQL upsert
-            stmt = insert(Rate).values(
-                currency=entry.currency,
-                timestamp=entry.timestamp,
-                rate_to_jpy=entry.rate_to_jpy,
-            )
-            stmt = stmt.on_conflict_do_update(
-                constraint="uq_rate_currency_timestamp",
-                set_={"rate_to_jpy": entry.rate_to_jpy}
-            )
+        result = await self.db.execute(
+            select(Rate.currency, Rate.timestamp).where(and_(
+                Rate.currency.in_({currency for currency, _ in deduped}),
+                Rate.timestamp.in_({timestamp for _, timestamp in deduped}),
+            ))
+        )
+        existing = {(row.currency, row.timestamp) for row in result.fetchall()}
 
-            # Check if exists
-            existing = await self.db.execute(
-                select(Rate).where(and_(
-                    Rate.currency == entry.currency,
-                    Rate.timestamp == entry.timestamp
-                ))
-            )
-            if existing.scalar_one_or_none():
-                updated += 1
-            else:
-                inserted += 1
+        updated = sum(1 for key in deduped if key in existing)
+        inserted = len(deduped) - updated
 
-            await self.db.execute(stmt)
+        stmt = insert(Rate).values([
+            {
+                "currency": entry.currency,
+                "timestamp": entry.timestamp,
+                "rate_to_jpy": entry.rate_to_jpy,
+            }
+            for entry in deduped.values()
+        ])
+        stmt = stmt.on_conflict_do_update(
+            constraint="uq_rate_currency_timestamp",
+            set_={"rate_to_jpy": stmt.excluded.rate_to_jpy},
+        )
+        await self.db.execute(stmt)
 
         await self.db.flush()
         return inserted, updated

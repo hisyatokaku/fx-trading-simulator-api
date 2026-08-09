@@ -79,7 +79,9 @@ def generate_intraday_rates(
 
 
 def main():
-    out_path = Path(__file__).parent.parent / "data" / "rates.csv"
+    # Keep this legacy demo output separate from the canonical June 2026
+    # one-minute dataset used by scripts/seed_data.py.
+    out_path = Path(__file__).parent.parent / "data" / "rates_2016.csv"
 
     # 1. Generate daily rates for all of 2016
     daily = generate_daily_rates(datetime(2016, 1, 4), datetime(2016, 12, 30))

@@ -34,14 +34,7 @@ cp .env.example .env
 alembic upgrade head
 ```
 
-### 5. Generate rates CSV
-
-```bash
-# Generates data/rates.csv (daily + hourly + 5-min for 2016)
-python scripts/generate_rates.py
-```
-
-### 6. Start server
+### 5. Start server
 
 ```bash
 uvicorn app.main:app --reload --port 8000
@@ -49,7 +42,7 @@ uvicorn app.main:app --reload --port 8000
 
 API docs available at `http://localhost:8000/docs`
 
-### 7. Seed data
+### 6. Seed data
 
 ```bash
 # Upserts scenarios.csv, traders.csv and rates.csv via the live API
@@ -66,38 +59,25 @@ docker compose up --build
 
 ---
 
-## Production (Railway)
+## Production
 
-Swagger UI: https://app-production-7488.up.railway.app/docs
-
-Migrations run automatically on every deploy, as part of the `startCommand` in `railway.toml`:
-
-```bash
-alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
-
-To run a migration manually against production without a full deploy:
-
-```bash
-RAILWAY_TOKEN=<project-token> npx @railway/cli run --service app --environment production alembic upgrade head
-```
+- API: http://34.146.231.219:8000
+- Swagger UI: http://34.146.231.219:8000/docs
 
 ### Seeding scenarios.csv / traders.csv / rates.csv
 
 Data seeding is independent of migrations, and can be re-run anytime data/*.csv changes — it upserts via the live API (`/api/scenario/bulk`, `/api/trader/bulk`, `/api/rate/bulk`), not the database directly, so it never gets out of sync with a schema change:
 
 ```bash
-python scripts/seed_data.py https://app-production-7488.up.railway.app
+python scripts/seed_data.py http://34.146.231.219:8000
 ```
-
-In GitLab CI, this is the manual `seed_data` job (`seed` stage) on `main`.
 
 ---
 
 ## Project Structure
 
 ```
-fxtrade-api/
+fx-trading-simulator-api/
 ├── app/
 │   ├── main.py              # FastAPI entry point
 │   ├── config.py            # Settings (env vars)
@@ -108,10 +88,10 @@ fxtrade-api/
 │   ├── services/            # Business logic
 │   └── utils/               # RateMatrix, date helpers
 ├── alembic/                 # DB migrations
-├── data/                    # scenarios.csv, traders.csv (rates.csv is generated)
+├── data/                    # June 2026 scenarios, traders, and one-minute rates
 ├── document/                # Participant guide (Jupyter notebook)
 ├── scripts/
-│   ├── generate_rates.py    # Generate rates.csv with intra-day data
+│   ├── generate_rates.py    # Generate optional data/rates_2016.csv demo data
 │   ├── seed_data.py         # Upsert scenarios/traders/rates via the live API
 │   └── verify_scenario.py   # End-to-end correctness test
 └── tests/                   # pytest test suite
@@ -147,7 +127,7 @@ pytest tests/ -v
 
 ```bash
 python scripts/verify_scenario.py                          # DEMO_5MIN (default)
-python scripts/verify_scenario.py DEMO_2016 testuser
+python scripts/verify_scenario.py DEMO_3DAY testuser
 python scripts/verify_scenario.py DEMO_5MIN testuser http://your-server.com
 ```
 

@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Tuple
 
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.models.session import TradingSession
 from app.models.balance import Balance
@@ -18,7 +18,10 @@ from app.utils.date_utils import add_interval
 
 
 # Supported currencies
-CURRENCIES = ["JPY", "USD", "EUR", "GBP", "AUD", "CHF", "CNY", "HKD"]
+CURRENCIES = [
+    "JPY", "USD", "EUR", "GBP", "AUD", "NZD", "CAD", "CHF",
+    "TRY", "ZAR", "MXN", "NOK", "SEK", "HKD",
+]
 
 
 class SessionService:
@@ -90,11 +93,10 @@ class SessionService:
         return trader
 
     async def get_session(self, session_id: int) -> Optional[TradingSession]:
-        """Get a session by ID with balances loaded."""
+        """Get a session by ID with its scenario loaded."""
         result = await self.db.execute(
             select(TradingSession)
-            .options(selectinload(TradingSession.balances))
-            .options(selectinload(TradingSession.scenario))
+            .options(joinedload(TradingSession.scenario))
             .where(TradingSession.id == session_id)
         )
         return result.scalar_one_or_none()
@@ -125,10 +127,10 @@ class SessionService:
         self,
         session: TradingSession,
         exchange_requests: List[ExchangeRequest]
-    ) -> Tuple[TradingSession, List[TradeResult], Dict[str, Decimal]]:
+    ) -> Tuple[TradingSession, List[TradeResult], Dict[str, Decimal], Dict[str, Decimal]]:
         """Execute trades and advance time.
 
-        Returns tuple of (updated_session, trade_results, current_rates).
+        Returns tuple of (updated_session, trade_results, current_rates, balances).
         """
         if session.is_complete:
             raise ValueError("Session is already complete")
@@ -178,9 +180,8 @@ class SessionService:
             self.db.add(balance)
 
         await self.db.flush()
-        await self.db.refresh(session)
 
-        return session, trade_results, current_rates
+        return session, trade_results, current_rates, balances
 
     async def _execute_single_trade(
         self,
