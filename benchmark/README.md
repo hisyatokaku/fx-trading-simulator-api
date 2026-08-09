@@ -51,6 +51,23 @@ python3 bench.py http://localhost:8000 local-mac 30
 [`results/local-mac_raw.csv`](results/local-mac_raw.csv) /
 [`results/gcp-vm-tokyo_raw.csv`](results/gcp-vm-tokyo_raw.csv)
 
+## サンプル戦略の完走時間（2026-08-09 実施）
+
+2025年イベント仕様書（`document/仕様書_2025.ipynb`）の FixedStrategySession を
+現在の API に移植し（[`sample_strategy_bench.py`](sample_strategy_bench.py)）、
+`DEMO_2016`（約1年分・259営業日）を完走させた。仕様書と同じく keep-alive なしの
+素の `requests` を使用（参加者の実条件）。API 呼び出しは計270回
+（start 1 + レート履歴10 + next 259）。
+
+| 環境 | /next 中央値 | 完走時間 | 最終JPY資産 |
+|---|---|---|---|
+| Railway 本番 | 1718.7ms | **277.8秒（約4分38秒）** | 1,006,561円 |
+| GCP東京VM（app+DB同居、外部から） | 100.7ms | **30.6秒** | 1,006,561円 |
+
+- 最終資産が両環境で一致 → 移植とデータ投入が正しいことの確認になっている
+- keep-alive を使わないと1リクエストごとに TCP/TLS 接続分（+60ms程度）が上乗せされる
+  （keep-alive ありの `bench.py` では VM で 37ms/step だった）
+
 ## 解釈
 
 - Railway の1ステップ約1秒のうち、クライアント↔サーバのネットワークは122msだけ。

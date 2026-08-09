@@ -1,0 +1,3 @@
+measured_at,label,scenario,total_api_calls,next_calls,next_median_ms,next_mean_ms,wall_seconds,base_url
+2026-08-09T18:54:27,gcp-vm,DEMO_2016,270,259,100.7,116.5,30.6,http://34.84.182.200:8000
+2026-08-09T18:59:20,railway-prod,DEMO_2016,270,259,1718.7,1056.1,277.8,https://app-production-7488.up.railway.app
