@@ -39,6 +39,28 @@ class RateService:
         rates = await self.get_rates_at_timestamp(timestamp)
         return RateMatrix(rates)
 
+    async def get_rates_for_timestamps(
+        self,
+        timestamps: List[datetime],
+    ) -> Dict[str, Dict[str, Decimal]]:
+        """Get rates grouped by timestamp for the requested simulation steps."""
+        if not timestamps:
+            return {}
+
+        result = await self.db.execute(
+            select(Rate)
+            .where(Rate.timestamp.in_(timestamps))
+            .order_by(Rate.timestamp, Rate.currency)
+        )
+
+        rates_by_timestamp: Dict[str, Dict[str, Decimal]] = {}
+        for rate in result.scalars().all():
+            timestamp = rate.timestamp.isoformat()
+            rates_by_timestamp.setdefault(timestamp, {})[
+                f"{rate.currency}/JPY"
+            ] = rate.rate_to_jpy
+        return rates_by_timestamp
+
     async def bulk_upsert(self, entries: List[RateEntry]) -> tuple[int, int]:
         """Bulk insert or update rates.
 

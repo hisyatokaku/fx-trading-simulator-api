@@ -107,12 +107,14 @@ fx-trading-simulator-api/
 | POST | `/api/scenario/` | Create scenario |
 | POST | `/api/scenario/bulk` | Bulk upsert scenarios |
 | POST | `/api/scenario/{id}/check-rates` | Check rate coverage for a scenario |
+| GET | `/api/scenario/{name}/rates` | Get rates at each scenario timestamp |
 | GET | `/api/rate/{datetime}` | Get rates at exact datetime |
 | POST | `/api/rate/bulk` | Bulk upsert rates |
 | POST | `/api/trader/bulk` | Bulk upsert traders |
 | POST | `/api/trade/start/{scenario}/{user_id}` | Start a trading session |
 | POST | `/api/trade/next` | Execute trades and advance time |
 | GET | `/api/trade/session/{session_id}` | Get session details |
+| GET | `/api/trade/session/{session_id}/history` | Get session details and balance history |
 | GET | `/api/trade/sessions/{user_id}` | Get all sessions for a user |
 
 ---

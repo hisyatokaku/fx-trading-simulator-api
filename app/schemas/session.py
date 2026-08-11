@@ -30,3 +30,9 @@ class SessionListResponse(BaseModel):
 
     sessions: List[SessionResponse]
     total: int
+
+
+class SessionHistoryResponse(SessionResponse):
+    """Trading session response including every recorded balance snapshot."""
+
+    balance_history: Dict[str, Dict[str, float]]

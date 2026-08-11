@@ -123,6 +123,20 @@ class SessionService:
         balances = result.scalars().all()
         return {b.currency: b.amount for b in balances}
 
+    async def get_balance_history(self, session_id: int) -> Dict[str, Dict[str, Decimal]]:
+        """Get every balance snapshot for a session, grouped by timestamp."""
+        result = await self.db.execute(
+            select(Balance)
+            .where(Balance.session_id == session_id)
+            .order_by(Balance.timestamp, Balance.currency)
+        )
+
+        history: Dict[str, Dict[str, Decimal]] = {}
+        for balance in result.scalars().all():
+            timestamp = balance.timestamp.isoformat()
+            history.setdefault(timestamp, {})[balance.currency] = balance.amount
+        return history
+
     async def execute_trades_and_advance(
         self,
         session: TradingSession,

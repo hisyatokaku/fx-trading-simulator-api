@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.schemas.session import SessionResponse, SessionListResponse
+from app.schemas.session import SessionResponse, SessionListResponse, SessionHistoryResponse
 from app.schemas.trade import TradeRequest, TradeResponse
 from app.services.scenario_service import ScenarioService
 from app.services.session_service import SessionService
@@ -146,6 +146,30 @@ async def get_session(
 
     balances = await session_service.get_current_balances(session)
     return _build_session_response(session, balances)
+
+
+@router.get("/session/{session_id}/history", response_model=SessionHistoryResponse)
+async def get_session_history(
+    session_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get session details and every recorded balance snapshot."""
+    session_service = SessionService(db)
+    session = await session_service.get_session(session_id)
+
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found"
+        )
+
+    balances = await session_service.get_current_balances(session)
+    history = await session_service.get_balance_history(session_id)
+    response = _build_session_response(session, balances)
+    return SessionHistoryResponse(
+        **response.model_dump(),
+        balance_history=history,
+    )
 
 
 @router.get("/sessions/{user_id}", response_model=SessionListResponse)
