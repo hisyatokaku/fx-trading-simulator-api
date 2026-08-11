@@ -81,6 +81,54 @@ async def test_get_scenario_not_found(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_get_scenario_rates(client: AsyncClient):
+    """Test getting rates only at timestamps visited by a scenario."""
+    await client.post(
+        "/api/scenario/",
+        json={
+            "name": "RATES_TEST",
+            "start_datetime": "2016-01-04T00:00:00",
+            "end_datetime": "2016-01-06T00:00:00",
+            "time_interval_seconds": 86400,
+        },
+    )
+    await client.post(
+        "/api/rate/bulk",
+        json={
+            "rates": [
+                {"currency": "USD", "timestamp": "2016-01-04T00:00:00", "rate_to_jpy": "118.25"},
+                {"currency": "EUR", "timestamp": "2016-01-04T00:00:00", "rate_to_jpy": "128.50"},
+                {"currency": "USD", "timestamp": "2016-01-04T12:00:00", "rate_to_jpy": "999.00"},
+                {"currency": "USD", "timestamp": "2016-01-05T00:00:00", "rate_to_jpy": "118.50"},
+                {"currency": "USD", "timestamp": "2016-01-06T00:00:00", "rate_to_jpy": "118.75"},
+            ]
+        },
+    )
+
+    response = await client.get("/api/scenario/RATES_TEST/rates")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "RATES_TEST"
+    assert list(data["date_to_currency_pair_to_rate"]) == [
+        "2016-01-04T00:00:00",
+        "2016-01-05T00:00:00",
+        "2016-01-06T00:00:00",
+    ]
+    assert data["date_to_currency_pair_to_rate"]["2016-01-04T00:00:00"] == {
+        "EUR/JPY": 128.5,
+        "USD/JPY": 118.25,
+    }
+
+
+@pytest.mark.asyncio
+async def test_get_scenario_rates_not_found(client: AsyncClient):
+    """Test getting rates for a non-existent scenario."""
+    response = await client.get("/api/scenario/NONEXISTENT/rates")
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_list_scenarios(client: AsyncClient):
     """Test listing all scenarios."""
     # Create some scenarios
