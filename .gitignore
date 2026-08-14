@@ -69,3 +69,5 @@ uv.lock
 
 # Claude Code local settings
 .claude/
+
+AGENTS.md
