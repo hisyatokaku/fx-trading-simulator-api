@@ -3,59 +3,37 @@ set -euo pipefail
 
 PROJECT_ID="fx-itnern"
 MEMBER="group:fx-intern-dev@googlegroups.com"
-ROLES=(
-  "roles/aiplatform.colabEnterpriseUser"
-  "roles/aiplatform.notebookRuntimeUser"
-  "roles/dataform.editor"
-)
-LOCATION="asia-northeast1"
+CUSTOM_ROLE_ID="privateColabEnterpriseUser"
+CUSTOM_ROLE="projects/${PROJECT_ID}/roles/${CUSTOM_ROLE_ID}"
 
-# Grant project level IAM roles to the MEMBER
-for role in "${ROLES[@]}"; do
+# Copy the Colab Enterprise User role without the permission that lists every notebook.
+PERMISSIONS="$(
+  gcloud iam roles describe roles/aiplatform.colabEnterpriseUser --format=json \
+    | jq -r '
+        .includedPermissions
+        - ["dataform.repositories.list", "resourcemanager.projects.list"]
+        | join(",")
+      '
+)"
+
+ROLE_FLAGS=(
+  --project="$PROJECT_ID"
+  --title="Private Colab Enterprise User"
+  --description="Use Colab Enterprise without listing other users' notebooks"
+  --permissions="$PERMISSIONS"
+  --stage=GA
+)
+
+if gcloud iam roles describe "$CUSTOM_ROLE_ID" --project="$PROJECT_ID" >/dev/null 2>&1; then
+  gcloud iam roles update "$CUSTOM_ROLE_ID" "${ROLE_FLAGS[@]}"
+else
+  gcloud iam roles create "$CUSTOM_ROLE_ID" "${ROLE_FLAGS[@]}"
+fi
+
+# Let participants create/import notebooks and use their own runtimes.
+for role in "$CUSTOM_ROLE" roles/aiplatform.notebookRuntimeUser; do
   gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="$MEMBER" \
-    --role="$role"
+    --role="$role" \
+    --condition=None
 done
-
-NOTEBOOK_ROLE="roles/dataform.codeEditor"
-
-BASE_URL="https://dataform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/repositories"
-TOKEN="$(gcloud auth print-access-token)"
-
-WORK_DIR="$(mktemp -d /tmp/grant-colab-policy.XXXXXX)"
-trap 'rm -rf "$WORK_DIR"' EXIT
-
-api() {
-  local method="$1" url="$2"
-  shift 2
-  curl --fail --silent --show-error -X "$method" \
-    -H "Authorization: Bearer ${TOKEN}" \
-    "$@" \
-    "$url"
-}
-
-# Collect every notebook (Dataform repository) in the location, page by page.
-page_token=""
-while :; do
-  api GET "${BASE_URL}?pageSize=1000&pageToken=${page_token}" > "${WORK_DIR}/page.json"
-  jq -r '.repositories // [] | .[].name' "${WORK_DIR}/page.json" >> "${WORK_DIR}/notebooks.txt"
-  page_token="$(jq -r '.nextPageToken // ""' "${WORK_DIR}/page.json")"
-  [[ -n "$page_token" ]] || break
-done
-
-# The applied policy is the same for every notebook.
-jq -n \
-  --arg role "${NOTEBOOK_ROLE}" \
-  --arg member "${MEMBER}" \
-  '{"policy": {"bindings": [{"role": $role, "members": [$member]}]}}' \
-  > "${WORK_DIR}/policy.json"
-
-while read -r notebook; do
-  echo "Granting ${NOTEBOOK_ROLE} on ${notebook}"
-
-  # Replace the resource-level IAM policy outright, dropping existing bindings.
-  api POST "https://dataform.googleapis.com/v1/${notebook}:setIamPolicy" \
-    -H "Content-Type: application/json" \
-    --data-binary "@${WORK_DIR}/policy.json" \
-    | jq .
-done < "${WORK_DIR}/notebooks.txt"
