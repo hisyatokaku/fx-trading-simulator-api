@@ -207,12 +207,21 @@ class SessionService:
         currency_from = request.currency_from.upper()
         currency_to = request.currency_to.upper()
 
+        # Compare as Decimal, not against the raw float. Balances are Decimal
+        # values quantized to 6 dp, while request.amount arrives from JSON as a
+        # float; comparing the two directly expands the float to its exact
+        # binary value (1000000.1 -> 1000000.099999999976716935634613037109375),
+        # so an order for the caller's entire balance reads as insufficient
+        # funds and is silently dropped. Decimal(str(...)) round-trips the
+        # float's shortest repr and matches the stored value exactly.
+        amount = Decimal(str(request.amount))
+
         current_balance = balances.get(currency_from, Decimal("0"))
-        if current_balance < request.amount:
+        if current_balance < amount:
             return None
 
         converted_amount, rate = rate_matrix.convert(
-            Decimal(str(request.amount)),
+            amount,
             currency_from,
             currency_to,
         )
@@ -220,7 +229,7 @@ class SessionService:
         if converted_amount is None:
             return None
 
-        balances[currency_from] = current_balance - Decimal(str(request.amount))
+        balances[currency_from] = current_balance - amount
         balances[currency_to] = balances.get(currency_to, Decimal("0")) + converted_amount
 
         return TradeResult(

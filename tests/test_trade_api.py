@@ -267,3 +267,49 @@ async def test_get_user_sessions(client: AsyncClient):
     data = response.json()
     assert data["total"] >= 2
     assert all(s["user_id"] == "multiuser" for s in data["sessions"])
+
+
+@pytest.mark.asyncio
+async def test_convert_entire_balance_is_not_dropped(client: AsyncClient):
+    """An order for exactly the caller's full balance must execute, not be skipped.
+
+    Balances are stored as Decimal but reported over JSON as float. Comparing the
+    stored Decimal against the raw float expands the float to its exact binary
+    value (8456.659619 -> 8456.65961900000002060551196336746215820312), which
+    reads as larger than the balance -- so every "convert everything" order was
+    silently dropped with no trade and no error.
+    """
+    await setup_scenario_and_rates(client, "FULL_BALANCE_TEST")
+
+    start_response = await client.post("/api/trade/start/FULL_BALANCE_TEST/fulltrader")
+    session_id = start_response.json()["id"]
+
+    # Spend the entire JPY balance on USD.
+    response = await client.post(
+        "/api/trade/next",
+        json={
+            "session_id": session_id,
+            "exchange_requests": [
+                {"currency_from": "JPY", "currency_to": "USD", "amount": 1000000}
+            ],
+        },
+    )
+    assert response.status_code == 200
+    usd_balance = response.json()["balances"]["USD"]
+    assert usd_balance > 0
+
+    # Sell it all back, quoting the balance exactly as the API just reported it.
+    response = await client.post(
+        "/api/trade/next",
+        json={
+            "session_id": session_id,
+            "exchange_requests": [
+                {"currency_from": "USD", "currency_to": "JPY", "amount": usd_balance}
+            ],
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["trades"], "full-balance order was silently dropped"
+    assert data["balances"]["USD"] == pytest.approx(0.0, abs=1e-6)
+    assert data["balances"]["JPY"] > 0
