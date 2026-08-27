@@ -93,13 +93,20 @@ def load_rates(csv_path: Path) -> list[dict]:
                 continue
 
             for currency in CURRENCIES:
-                rate_value = row.get(currency)
-                if rate_value:
-                    rates.append({
-                        "currency": currency,
-                        "timestamp": timestamp.isoformat(),
-                        "rate_to_jpy": rate_value.strip(),
-                    })
+                rate_value = (row.get(currency) or "").strip()
+                if not rate_value:
+                    continue
+                try:
+                    if float(rate_value) <= 0:
+                        continue  # 0 = dummy placeholder (e.g. an unused currency in a
+                                  # synthetic scenario), not a real rate; the API requires > 0
+                except ValueError:
+                    continue
+                rates.append({
+                    "currency": currency,
+                    "timestamp": timestamp.isoformat(),
+                    "rate_to_jpy": rate_value,
+                })
     return rates
 
 
