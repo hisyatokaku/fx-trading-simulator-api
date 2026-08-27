@@ -38,9 +38,9 @@ DATETIME_FMT = "%Y-%m-%d %H:%M:%S"
 # far in the past relative to data/rates.csv's real data (starts 2026-06-01),
 # each non-overlapping so TUTORIAL1/2/3 can never collide with each other.
 SCENARIO_STARTS = {
-    1: datetime(2020, 1, 6, 0, 0, 0),
-    2: datetime(2020, 2, 3, 0, 0, 0),
-    3: datetime(2020, 3, 2, 0, 0, 0),
+    1: datetime(2000, 1, 6, 0, 0, 0),
+    2: datetime(2000, 2, 3, 0, 0, 0),
+    3: datetime(2000, 3, 2, 0, 0, 0),
 }
 
 
