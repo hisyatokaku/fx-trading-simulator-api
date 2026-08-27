@@ -72,6 +72,3 @@ uv.lock
 !.claude/skills/
 
 AGENTS.md
-
-# generate_tutorial_scenarios.py の中間出力（data/rates.csv にマージ済み）
-data/day1_scenario*.csv
