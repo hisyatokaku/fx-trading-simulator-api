@@ -313,3 +313,52 @@ async def test_convert_entire_balance_is_not_dropped(client: AsyncClient):
     assert data["trades"], "full-balance order was silently dropped"
     assert data["balances"]["USD"] == pytest.approx(0.0, abs=1e-6)
     assert data["balances"]["JPY"] > 0
+
+
+@pytest.mark.asyncio
+async def test_order_a_hair_above_the_balance_still_executes(client: AsyncClient):
+    """Sub-quantum overshoot must not drop the order, but a real one still must.
+
+    Callers size a "sell everything" order as balance * rate / rate, which lands
+    a fraction of a ulp either side of the balance. Balances are Numeric(20, 6),
+    so an overshoot below 1e-6 is noise, not insufficient funds.
+    """
+    await setup_scenario_and_rates(client, "EPSILON_TEST")
+
+    start_response = await client.post("/api/trade/start/EPSILON_TEST/epsilontrader")
+    session_id = start_response.json()["id"]
+
+    response = await client.post(
+        "/api/trade/next",
+        json={
+            "session_id": session_id,
+            "exchange_requests": [
+                {"currency_from": "JPY", "currency_to": "USD", "amount": 1000000}
+            ],
+        },
+    )
+    usd_balance = response.json()["balances"]["USD"]
+
+    # A hair over the balance, well inside the 1e-6 storage quantum.
+    response = await client.post(
+        "/api/trade/next",
+        json={
+            "session_id": session_id,
+            "exchange_requests": [
+                {"currency_from": "USD", "currency_to": "JPY", "amount": usd_balance + 1e-9}
+            ],
+        },
+    )
+    assert response.json()["trades"], "sub-quantum overshoot was dropped"
+
+    # Genuinely more than the caller holds is still refused.
+    response = await client.post(
+        "/api/trade/next",
+        json={
+            "session_id": session_id,
+            "exchange_requests": [
+                {"currency_from": "USD", "currency_to": "JPY", "amount": 1000.0}
+            ],
+        },
+    )
+    assert response.json()["trades"] == []
