@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Generate synthetic USD/JPY price series for the tutorial's TUTORIAL1/2/3 scenarios.
 
-Reproduces the exact generation rules used to teach notebooks/tutorial_private.ipynb's
+Reproduces the exact generation rules used to teach document/tutorial.ipynb's
 challenge 1/2/3 (same formulas, same seed=42), then:
 
   1. Writes each series as a standalone rates-format CSV: data/day1_scenario{1,2,3}.csv
@@ -35,8 +35,9 @@ N_TICKS = 1000
 INTERVAL_SECONDS = 60
 DATETIME_FMT = "%Y-%m-%d %H:%M:%S"
 
-# far in the past relative to data/rates.csv's real data (starts 2026-06-01),
-# each non-overlapping so TUTORIAL1/2/3 can never collide with each other.
+# far in the past relative to data/rates.csv's real data (2015-2026, incl. the
+# EVAL scenarios), each non-overlapping so TUTORIAL1/2/3 can never collide
+# with each other or with a real trading day.
 SCENARIO_STARTS = {
     1: datetime(2000, 1, 6, 0, 0, 0),
     2: datetime(2000, 2, 3, 0, 0, 0),
