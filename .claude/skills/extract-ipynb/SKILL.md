@@ -18,7 +18,7 @@ description: ipynb のコードセルだけを .py ファイルに抽出する�
 
    ```bash
    mkdir -p document/tmp
-   python3 scripts/extract_ipynb_code.py document/colab_template.ipynb document/tmp/colab_template.py
+   python3 scripts/extract_ipynb_code.py document/day2-tutorial.ipynb document/tmp/day2-tutorial.py
    ```
 
    出力先ディレクトリは自動作成されないので、必要なら先に `mkdir -p` する。

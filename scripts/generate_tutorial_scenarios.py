@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Generate synthetic USD/JPY price series for the tutorial's TUTORIAL1/2/3 scenarios.
 
-Reproduces the exact generation rules used to teach document/tutorial.ipynb's
+Reproduces the exact generation rules used to teach document/day1-tutorial.ipynb's
 challenge 1/2/3 (same formulas, same seed=42), then:
 
   1. Writes each series as a standalone rates-format CSV: data/day1_scenario{1,2,3}.csv
