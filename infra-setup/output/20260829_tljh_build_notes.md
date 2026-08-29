@@ -66,6 +66,11 @@ sudo quotaon -p /      # → user quota on / (/dev/root) is on
   削除スクリプトは誤作動リスクを避けるため置かない方針。消すときは VM 上で手動: Admin パネル or `curl -X DELETE .../hub/api/users/<id>`）
 - この時点の `/home` は `jupyter-tonkou` のみ。**kein は未ログイン**（Hub 上には居るがホーム無し）
 
+## 同日追記: 本番参加者 60 名分の ID を登録
+- `users/participants.txt`：英数 5 文字 × 60（0 o i l 1 を除外、数字のみは除外、31^5 ≈ 2,860 万通り）
+- `08_create_users.sh` で 60 件 `created`（ログ `08_create_users_*.log` 最新）。Hub 上は管理者 2 + tester 8 + 本番 60 = 70 ユーザー
+- 全員未ログイン。ID 配布後は早めにログインしてパスワードを確定させる運用
+
 ## 次にやること
 - [ ] 参加者アカウントでメモリ 1GB / CPU / クォータの体感テスト（リハ 2〜3 人）
 - [ ] README が参照する `document/TLJH説明.md` が存在しない → 削除かパス修正
