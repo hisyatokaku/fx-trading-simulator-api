@@ -1,0 +1,20 @@
+app VM internal IP: 10.146.0.24
+Creating firewall...
+..Created [https://www.googleapis.com/compute/v1/projects/fx-itnern/global/firewalls/allow-tljh-http].
+done.
+NAME             NETWORK  DIRECTION  PRIORITY  ALLOW   DENY  DISABLED
+allow-tljh-http  default  INGRESS    1000      tcp:80        False
+Created [https://www.googleapis.com/compute/v1/projects/fx-itnern/regions/asia-northeast1/addresses/fx-tljh-ip].
+TLJH static IP: 35.243.84.187
+Created [https://www.googleapis.com/compute/v1/projects/fx-itnern/zones/asia-northeast1-b/instances/fx-tljh].
+WARNING: Some requests generated warnings:
+ - Disk size: '128 GB' is larger than image size: '10 GB'. You might need to resize the root repartition manually if the operating system does not support automatic resizing. See https://cloud.google.com/compute/docs/disks/add-persistent-disk#resize_pd for details.
+
+NAME     ZONE               MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP    EXTERNAL_IP    STATUS
+fx-tljh  asia-northeast1-b  e2-highmem-8               10.146.15.205  35.243.84.187  RUNNING
+
+VM created: fx-tljh (asia-northeast1-b)
+  TLJH URL (プロビジョニング完了後、5〜10分): http://35.243.84.187  ※静的IPなので停止→起動でも変わらない
+  進捗確認: gcloud compute ssh fx-tljh --project=fx-itnern --zone=asia-northeast1-b \
+              --command='sudo journalctl -u google-startup-scripts -f'
+  完了判定: 同 --command='sudo test -f /opt/tljh-provisioned && echo done'

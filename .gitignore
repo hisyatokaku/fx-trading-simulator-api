@@ -72,3 +72,6 @@ uv.lock
 !.claude/skills/
 
 AGENTS.md
+
+# infra-setup の実行ログは記録として残す（秘密情報を含むものは各スクリプトが出力を伏せる）
+!infra-setup/output/*.log
