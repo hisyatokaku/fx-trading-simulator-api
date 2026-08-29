@@ -38,7 +38,7 @@ FXトレーディング演習の実行環境（app/DB VM + TLJH VM の2台構成
 注意: 07 は既存ホームの同名ファイルを**絶対に上書きしない**（上書きオプションは事故防止のため無い）。
 内容を更新して配り直すときは別のファイル名にする（例: `tutorial-v2.ipynb`）。
 
-ID リストは `users/` 配下（`testers.txt` = tester-1〜8、2026-08-29 作成）。08 で登録した ID は Admin パネルに
+ID リストは `users/` 配下（`testers.txt` = tester-1〜8、`participants.txt` = 本番 60 名の英数 5 文字 ID、いずれも 2026-08-29 作成・登録済み）。08 で登録した ID は Admin パネルに
 表示されるが、**Linux ユーザーとホームディレクトリは本人の初回ログイン時に作られる**（パスワードもその時に確定）。
 
 ログインできるのは **08 で登録済みの ID だけ**（TLJH は `FirstUseAuthenticator.create_users=False` が既定。
