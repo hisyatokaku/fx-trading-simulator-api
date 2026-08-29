@@ -1,0 +1,10 @@
+# テスター用ID（2026-08-29 作成）。1行1ID。# で始まる行と空行は無視
+# 初回ログイン時に本人が入力したパスワードが登録される（FirstUseAuthenticator）
+tester-1
+tester-2
+tester-3
+tester-4
+tester-5
+tester-6
+tester-7
+tester-8

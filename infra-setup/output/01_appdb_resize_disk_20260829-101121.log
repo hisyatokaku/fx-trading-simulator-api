@@ -1,0 +1,45 @@
+Updated [https://www.googleapis.com/compute/v1/projects/fx-itnern/zones/asia-northeast1-b/disks/fx-trade-api-ssd-2].
+---
+architecture: X86_64
+creationTimestamp: '2026-08-09T03:40:18.898-07:00'
+enableConfidentialCompute: false
+guestOsFeatures:
+- type: UEFI_COMPATIBLE
+- type: VIRTIO_SCSI_MULTIQUEUE
+- type: GVNIC
+- type: SEV_CAPABLE
+- type: SEV_SNP_CAPABLE
+- type: SEV_LIVE_MIGRATABLE_V2
+- type: IDPF
+id: '4790644866165368829'
+kind: compute#disk
+labelFingerprint: 42WmSpB8rSM=
+lastAttachTimestamp: '2026-08-09T03:40:19.602-07:00'
+licenseCodes:
+- '2180280051442266149'
+licenses:
+- https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-13-trixie
+name: fx-trade-api-ssd-2
+physicalBlockSizeBytes: '4096'
+resourcePolicies:
+- https://www.googleapis.com/compute/v1/projects/fx-itnern/regions/asia-northeast1/resourcePolicies/default-schedule-1
+satisfiesPzi: true
+selfLink: https://www.googleapis.com/compute/v1/projects/fx-itnern/zones/asia-northeast1-b/disks/fx-trade-api-ssd-2
+sizeGb: '30'
+sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-13-trixie-v20260804
+sourceImageId: '9134795984451016238'
+status: READY
+type: https://www.googleapis.com/compute/v1/projects/fx-itnern/zones/asia-northeast1-b/diskTypes/pd-ssd
+users:
+- https://www.googleapis.com/compute/v1/projects/fx-itnern/zones/asia-northeast1-b/instances/fx-trade-api-ssd
+zone: https://www.googleapis.com/compute/v1/projects/fx-itnern/zones/asia-northeast1-b
+bash: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8): No such file or directory
+CHANGED: partition=1 start=262144 old: size=20707328 end=20969471 new: size=62652383 end=62914526
+resize2fs 1.47.2 (1-Jan-2025)
+Filesystem at /dev/sda1 is mounted on /; on-line resizing required
+old_desc_blocks = 2, new_desc_blocks = 4
+The filesystem on /dev/sda1 is now 7831547 (4k) blocks long.
+
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        30G  6.3G   22G  23% /
+done: disk resized to 30GB

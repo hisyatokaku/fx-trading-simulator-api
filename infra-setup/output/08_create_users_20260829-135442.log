@@ -1,0 +1,10 @@
+exists  tester-1
+exists  tester-2
+exists  tester-3
+exists  tester-4
+exists  tester-5
+created tester-6
+created tester-7
+created tester-8
+--- all users:
+kein tester-1 tester-2 tester-3 tester-4 tester-5 tester-6 tester-7 tester-8 tonkou
