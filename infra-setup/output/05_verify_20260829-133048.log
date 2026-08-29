@@ -1,0 +1,12 @@
+=== TLJH VM -> app VM ===
+--- ping (RTT 0.5ms 以下が目安) ---
+PING 10.146.0.24 (10.146.0.24) 56(84) bytes of data.
+
+--- 10.146.0.24 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4060ms
+rtt min/avg/max/mdev = 0.303/0.613/1.606/0.498 ms
+--- API health ---
+{"status":"healthy"} OK
+--- /next 100往復の実測 (Day1想定: 1000往復で15〜30秒 = 100往復で1.5〜3秒) ---
+100 steps: 1.57s (15.7ms/step)
+=== verify done ===

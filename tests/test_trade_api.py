@@ -214,6 +214,38 @@ async def test_get_session(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_get_session_history(client: AsyncClient):
+    """Test getting all balance snapshots for a session."""
+    await setup_scenario_and_rates(client, "HISTORY_TEST")
+
+    start_response = await client.post("/api/trade/start/HISTORY_TEST/history_trader")
+    session_id = start_response.json()["id"]
+    await client.post(
+        "/api/trade/next",
+        json={"session_id": session_id, "exchange_requests": []},
+    )
+
+    response = await client.get(f"/api/trade/session/{session_id}/history")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == session_id
+    assert data["scenario_name"] == "HISTORY_TEST"
+    assert list(data["balance_history"]) == [
+        "2016-01-04T00:00:00",
+        "2016-01-05T00:00:00",
+    ]
+    assert data["balance_history"]["2016-01-04T00:00:00"]["JPY"] == 1000000
+
+
+@pytest.mark.asyncio
+async def test_get_session_history_not_found(client: AsyncClient):
+    """Test getting history for a non-existent session."""
+    response = await client.get("/api/trade/session/99999/history")
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_get_session_not_found(client: AsyncClient):
     """Test getting non-existent session."""
     response = await client.get("/api/trade/session/99999")

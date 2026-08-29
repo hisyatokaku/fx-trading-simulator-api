@@ -14,12 +14,23 @@ from app.schemas.scenario import (
     ScenarioBulkResponse,
     RateCheckRequest,
     RateCheckResponse,
+    ScenarioRatesResponse,
 )
 from app.services.scenario_service import ScenarioService
 from app.services.rate_service import RateService
 from app.utils.date_utils import add_interval
 
 router = APIRouter()
+
+
+def _scenario_timestamps(scenario) -> list:
+    """Generate the timestamps visited by a scenario."""
+    timestamps = []
+    current = scenario.start_datetime
+    while current <= scenario.end_datetime:
+        timestamps.append(current)
+        current = add_interval(current, scenario.time_interval_seconds)
+    return timestamps
 
 
 @router.get("/", response_model=List[ScenarioResponse])
@@ -41,6 +52,29 @@ async def get_scenario(name: str, db: AsyncSession = Depends(get_db)):
             detail=f"Scenario '{name}' not found"
         )
     return scenario
+
+
+@router.get("/{name}/rates", response_model=ScenarioRatesResponse)
+async def get_scenario_rates(name: str, db: AsyncSession = Depends(get_db)):
+    """Get rates at every timestamp visited by a scenario."""
+    scenario_service = ScenarioService(db)
+    scenario = await scenario_service.get_by_name(name)
+    if not scenario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scenario '{name}' not found"
+        )
+
+    rate_service = RateService(db)
+    rates = await rate_service.get_rates_for_timestamps(
+        _scenario_timestamps(scenario)
+    )
+    return ScenarioRatesResponse(
+        name=scenario.name,
+        start_datetime=scenario.start_datetime,
+        end_datetime=scenario.end_datetime,
+        date_to_currency_pair_to_rate=rates,
+    )
 
 
 @router.post("/", response_model=ScenarioResponse, status_code=status.HTTP_201_CREATED)
@@ -122,11 +156,7 @@ async def check_scenario_rates(
         )
 
     # Generate all expected timestamps
-    timestamps = []
-    current = scenario.start_datetime
-    while current <= scenario.end_datetime:
-        timestamps.append(current)
-        current = add_interval(current, scenario.time_interval_seconds)
+    timestamps = _scenario_timestamps(scenario)
 
     currencies = [c.upper() for c in data.currencies]
     rate_service = RateService(db)

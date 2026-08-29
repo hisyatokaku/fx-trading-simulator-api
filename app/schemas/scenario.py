@@ -76,6 +76,15 @@ class RateCheckResponse(BaseModel):
     complete: bool
 
 
+class ScenarioRatesResponse(BaseModel):
+    """Scenario metadata and rates at each simulation timestamp."""
+
+    name: str
+    start_datetime: datetime
+    end_datetime: datetime
+    date_to_currency_pair_to_rate: Dict[str, Dict[str, float]]
+
+
 class ScenarioResponse(BaseModel):
     """Schema for scenario response."""
 
