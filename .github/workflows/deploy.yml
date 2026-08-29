@@ -69,4 +69,4 @@ jobs:
         run: python -m pip install requests
 
       - name: Test deployed API end to end
-        run: python scripts/verify_scenario.py DEMO_3DAY testuser "$API_BASE_URL"
+        run: python scripts/verify_scenario.py TEST0 testuser "$API_BASE_URL"
