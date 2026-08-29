@@ -31,7 +31,7 @@ jobs:
       - name: Deploy on Compute Engine
         run: |
           set -o pipefail
-          tar --exclude=.git --exclude='gha-creds-*.json' -czf - . | gcloud compute ssh \
+          tar --exclude=.git --exclude=docker-compose.yml --exclude='gha-creds-*.json' -czf - . | gcloud compute ssh \
             --zone "asia-northeast1-b" \
             "ky2001@fx-trade-api-ssd" \
             --project "fx-itnern" \
@@ -40,7 +40,7 @@ jobs:
             --command='set -eu
               deploy_dir=/home/ky2001/fxtrade-api
               mkdir -p "$deploy_dir"
-              find "$deploy_dir" -mindepth 1 -maxdepth 1 ! -name .env -exec rm -rf -- {} +
+              find "$deploy_dir" -mindepth 1 -maxdepth 1 ! -name .env ! -name docker-compose.yml -exec rm -rf -- {} +
               tar -xzf - -C "$deploy_dir"
               cd "$deploy_dir"
               docker compose -p fxtrade-api build app
