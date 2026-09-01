@@ -11,8 +11,8 @@ async def test_bulk_upload_traders(client: AsyncClient):
         "/api/trader/bulk",
         json={
             "traders": [
-                {"user_id": "testuser", "type": "test"},
-                {"user_id": "produser", "type": "prod"},
+                {"user_id": "bulk_user_a", "type": "test"},
+                {"user_id": "bulk_user_b", "type": "prod"},
             ]
         }
     )

@@ -82,6 +82,13 @@ async def client(test_engine) -> AsyncGenerator[AsyncClient, None]:
                 await session.rollback()
                 raise
 
+    # Pre-register the trader IDs used across tests
+    # (start_session no longer auto-creates unknown traders; unregistered IDs get 403)
+    async with TestSessionLocal() as session:
+        for uid in ["gap_trader", "history_trader", "multiuser", "testuser", "trader1", "trader2", "trader3", "trader4", "trader5"]:
+            session.add(Trader(user_id=uid, type="test"))
+        await session.commit()
+
     app.dependency_overrides[get_db] = override_get_db
 
     transport = ASGITransport(app=app)

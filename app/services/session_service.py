@@ -78,17 +78,16 @@ class SessionService:
         return session
 
     async def _ensure_trader(self, user_id: str, game_type: str) -> Trader:
-        """Ensure trader exists, create if not."""
+        """Look up a pre-registered trader; reject unknown IDs."""
         result = await self.db.execute(
             select(Trader).where(Trader.user_id == user_id)
         )
         trader = result.scalar_one_or_none()
 
         if not trader:
-            trader_type = "prod" if game_type == "PROD" else "test"
-            trader = Trader(user_id=user_id, type=trader_type)
-            self.db.add(trader)
-            await self.db.flush()
+            raise PermissionError(
+                f"user_id '{user_id}' is not registered. Use the ID distributed by the staff."
+            )
 
         return trader
 
