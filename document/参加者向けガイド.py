@@ -195,8 +195,9 @@ from matplotlib import ticker
 
 # %%
 # ===== 設定 =====
-# BASE_URL は主催者から案内されたサーバーURLに変更してください
-BASE_URL   = 'http://localhost:8000'
+# BASE_URL は演習環境（JupyterHub）では自動設定されます。他環境では主催者の案内に従ってください
+import os
+BASE_URL   = os.environ.get("FX_API_BASE_URL", "http://34.146.231.219:8000")
 SCENARIO   = 'DEMO_3DAY'   # 使用するシナリオ名
 USER_ID    = 'dummyUser'   # 配布されたユーザーID に置き換えること（このままではエラーになります）
 

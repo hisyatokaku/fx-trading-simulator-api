@@ -157,7 +157,7 @@
 #
 # ## 5. **実行**
 #
-# 以下のコード群を上から順に実行することで、セッション開始に必要な事前準備を行うことができます。
+# この下のセルを、上から順に「解答例」セルの手前まですべて実行すると、セッション開始に必要な事前準備が整います。
 #
 #
 # 自作の Session クラスを実装する際には、BaseTradingSession を継承し、strategy メソッドを override してください。コード群の下部に、サンプルとして FixedStrategySession, ContrarianStrategySession が提供されています。
@@ -478,7 +478,7 @@ session = FixedStrategySession(test_case="TEST1", user_id=USER_ID)
 session.proceed_one_tick()
 
 # %% id="9b9F4QRU4q2h"
-# 終了まで実行したい場合に使用する
+# 終了まで実行したい場合に使用する（1 シナリオ 1,439 tick ≒ 20〜30 秒。進捗バーが出ます）
 session.proceed_to_end()
 
 
