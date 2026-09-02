@@ -1,0 +1,46 @@
+executed 2026-09-02 ~22:35 JST: TLJH の HTTPS 化（Let's Encrypt + sslip.io）
+
+## 決定事項
+- ホスト名: 35-243-84-187.sslip.io（登録不要の無料DNS。自動で 35.243.84.187 に解決）
+- 参加者向け URL は今後 https://35-243-84-187.sslip.io を案内する
+
+## 実行コマンドと結果
+
+# 1. DNS 解決確認（ローカルから）
+python3 -c "import socket; print(socket.gethostbyname('35-243-84-187.sslip.io'))"
+-> 35.243.84.187
+
+# 2. ファイアウォールで tcp:443 開放（tljh タグ宛て）
+gcloud compute firewall-rules create allow-tljh-https --project=fx-itnern \
+  --direction=INGRESS --action=ALLOW --rules=tcp:443 --target-tags=tljh
+-> allow-tljh-https  default  INGRESS  1000  tcp:443  (created)
+
+# 3. TLJH 側の設定（fx-tljh に ssh して実行）
+sudo tljh-config set https.enabled true
+sudo tljh-config set https.letsencrypt.email hisyatokaku2003@gmail.com
+sudo tljh-config add-item https.letsencrypt.domains 35-243-84-187.sslip.io
+sudo tljh-config reload proxy
+-> tljh-config show:
+   https:
+     enabled: true
+     letsencrypt:
+       email: hisyatokaku2003@gmail.com
+       domains:
+       - 35-243-84-187.sslip.io
+-> Proxy reload with new configuration complete
+
+# 4. 検証（ローカルから）
+curl https://35-243-84-187.sslip.io/hub/login
+-> 200 OK（reload 後 約20秒で証明書取得完了）
+openssl s_client -connect 35-243-84-187.sslip.io:443 | openssl x509 -noout -issuer -enddate
+-> issuer=C=US, O=Let's Encrypt, CN=YR1
+-> notAfter=Dec  1 12:42:26 2026 GMT（以後 traefik が自動更新）
+curl -w '%{http_code} %{redirect_url}' http://35.243.84.187/
+-> 301 https://35.243.84.187/
+
+## 注意（運用に効く）
+- http://35.243.84.187（IP 直打ち）は https://35.243.84.187 に 301 されるが、
+  証明書は sslip.io 名義のため **IP のままだと証明書警告が出る**。
+  案内は必ず https://35-243-84-187.sslip.io で行うこと
+- 既存ドキュメント（運営手順.md / 参加者向け手順.md 等）の http://35.243.84.187 記載は要差し替え
+- 証明書の期限通知は hisyatokaku2003@gmail.com に届く

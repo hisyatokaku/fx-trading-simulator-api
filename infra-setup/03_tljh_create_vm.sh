@@ -4,6 +4,8 @@
 # プロビジョニングの実体は 04_tljh_provision.sh（startup-script として自動実行される）。
 #
 # 完了後 http://<外部IP> にアクセス。初回ログインは管理者ユーザー名 + 任意のパスワード
+# （本番は HTTPS 化済み。再構築時は tcp:443 開放 + tljh-config の https 設定も再適用する。
+#   手順の記録: infra-setup/output/https_enable_20260902-2235.log）
 # （FirstUseAuthenticator: 初回に入力したパスワードがそのまま登録される）
 set -euo pipefail
 source "$(dirname "$0")/config.sh"
@@ -46,6 +48,7 @@ cat <<EOF
 
 VM created: $TLJH_VM ($ZONE)
   TLJH URL (プロビジョニング完了後、5〜10分): http://$STATIC_IP  ※静的IPなので停止→起動でも変わらない
+  ※HTTPS 化は別途: tcp:443 開放 + tljh-config https 設定（output/https_enable_20260902-2235.log 参照）
   進捗確認: gcloud compute ssh $TLJH_VM --project=$PROJECT --zone=$ZONE \\
               --command='sudo journalctl -u google-startup-scripts -f'
   完了判定: 同 --command='sudo test -f /opt/tljh-provisioned && echo done'
