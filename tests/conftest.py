@@ -89,6 +89,7 @@ async def client(test_engine) -> AsyncGenerator[AsyncClient, None]:
     session_service.ALLOWED_USER_IDS = saved_allowlist | {
         "gap_trader", "history_trader", "multiuser", "testuser",
         "trader1", "trader2", "trader3", "trader4", "trader5",
+        "trader6", "trader7",
     }
 
     app.dependency_overrides[get_db] = override_get_db

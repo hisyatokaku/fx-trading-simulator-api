@@ -170,6 +170,70 @@ async def test_trade_on_completed_session(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_jpy_balance_valued_at_current_datetime(client: AsyncClient):
+    """jpy_balance values holdings at current_datetime, not at the tick just traded."""
+    await setup_scenario_and_rates(client, "VALUATION_TEST")
+
+    start_response = await client.post("/api/trade/start/VALUATION_TEST/trader6")
+    session_id = start_response.json()["id"]
+
+    # Trades at 2016-01-04 (USD 118.25), then advances to 2016-01-05 (USD 118.50).
+    response = await client.post(
+        "/api/trade/next",
+        json={
+            "session_id": session_id,
+            "exchange_requests": [
+                {"currency_from": "JPY", "currency_to": "USD", "amount": 118250}
+            ],
+        }
+    )
+    data = response.json()
+    assert data["current_datetime"] == "2016-01-05T00:00:00"
+
+    jpy = data["balances"]["JPY"]
+    usd = data["balances"]["USD"]
+    assert usd > 0
+    assert data["jpy_balance"] == pytest.approx(jpy + usd * 118.50, abs=0.01)
+    # Valuing at the traded tick instead would give a materially different total.
+    assert data["jpy_balance"] != pytest.approx(jpy + usd * 118.25, abs=0.01)
+
+
+@pytest.mark.asyncio
+async def test_final_jpy_balance_valued_at_end_tick(client: AsyncClient):
+    """The final score values holdings at the scenario's end tick."""
+    await setup_scenario_and_rates(client, "FINAL_VALUE_TEST")
+
+    start_response = await client.post("/api/trade/start/FINAL_VALUE_TEST/trader7")
+    session_id = start_response.json()["id"]
+
+    await client.post(
+        "/api/trade/next",
+        json={
+            "session_id": session_id,
+            "exchange_requests": [
+                {"currency_from": "JPY", "currency_to": "USD", "amount": 118250}
+            ],
+        }
+    )
+
+    for _ in range(5):
+        data = (await client.post(
+            "/api/trade/next",
+            json={"session_id": session_id, "exchange_requests": []}
+        )).json()
+        if data["is_complete"]:
+            break
+
+    assert data["is_complete"] is True
+    assert data["current_datetime"] == "2016-01-08T00:00:00"
+
+    jpy = data["balances"]["JPY"]
+    usd = data["balances"]["USD"]
+    # 2016-01-08 USD is 119.50; the preceding tick's 119.00 would score lower.
+    assert data["jpy_balance"] == pytest.approx(jpy + usd * 119.50, abs=0.01)
+
+
+@pytest.mark.asyncio
 async def test_advance_into_missing_rate_gap(client: AsyncClient):
     """Advancing into a timestamp with no rate data should 404, not crash with a 500."""
     await client.post(
