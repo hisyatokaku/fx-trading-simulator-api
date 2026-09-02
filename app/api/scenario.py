@@ -60,6 +60,13 @@ async def get_scenario(name: str, db: AsyncSession = Depends(get_db)):
 @router.get("/{name}/rates", response_model=ScenarioRatesResponse)
 async def get_scenario_rates(name: str, db: AsyncSession = Depends(get_db)):
     """Get rates at every timestamp visited by a scenario."""
+    # Evaluation scenario rates must not be disclosed in advance: a single
+    # request here would reveal the whole day the participants are scored on.
+    if "EVAL" in name.upper():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Rates for evaluation scenarios are not disclosed"
+        )
     scenario_service = ScenarioService(db)
     scenario = await scenario_service.get_by_name(name)
     if not scenario:

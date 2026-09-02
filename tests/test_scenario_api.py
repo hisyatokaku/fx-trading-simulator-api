@@ -301,3 +301,53 @@ async def test_list_scenarios_hides_eval(client: AsyncClient):
     response = await client.get("/api/scenario/EVAL_HIDDEN")
     assert response.status_code == 200
     assert response.json()["name"] == "EVAL_HIDDEN"
+
+
+@pytest.mark.asyncio
+async def test_eval_scenario_rates_forbidden(client: AsyncClient):
+    """The full-rates dump is refused for evaluation scenarios (403)."""
+    for name in ["EVAL_BLOCKED", "OPEN_SCENARIO"]:
+        await client.post(
+            "/api/scenario/",
+            json={
+                "name": name,
+                "start_datetime": "2016-01-04T00:00:00",
+                "end_datetime": "2016-01-08T00:00:00",
+                "time_interval_seconds": 86400,
+                "initial_balance": 1000000,
+            }
+        )
+
+    response = await client.get("/api/scenario/EVAL_BLOCKED/rates")
+    assert response.status_code == 403
+
+    response = await client.get("/api/scenario/OPEN_SCENARIO/rates")
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_rate_lookup_forbidden_inside_eval_window(client: AsyncClient):
+    """GET /api/rate/{ts} is refused for timestamps inside an EVAL scenario."""
+    await client.post(
+        "/api/scenario/",
+        json={
+            "name": "EVAL_WINDOW",
+            "start_datetime": "2016-01-04T00:00:00",
+            "end_datetime": "2016-01-06T00:00:00",
+            "time_interval_seconds": 86400,
+            "initial_balance": 1000000,
+        }
+    )
+    await client.post(
+        "/api/rate/bulk",
+        json={"rates": [
+            {"currency": "USD", "timestamp": "2016-01-05T00:00:00", "rate_to_jpy": "118.25"},
+            {"currency": "USD", "timestamp": "2016-02-01T00:00:00", "rate_to_jpy": "119.00"},
+        ]}
+    )
+
+    response = await client.get("/api/rate/2016-01-05T00:00:00")
+    assert response.status_code == 403
+
+    response = await client.get("/api/rate/2016-02-01T00:00:00")
+    assert response.status_code == 200
