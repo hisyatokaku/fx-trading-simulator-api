@@ -194,8 +194,17 @@ class SessionService:
         session.current_datetime = new_datetime
         session.is_complete = is_complete
 
-        # Calculate JPY balance (total value in JPY)
-        jpy_balance = await self._calculate_jpy_balance(balances, rate_matrix)
+        # Calculate JPY balance (total value in JPY) at the tick we just advanced to,
+        # so jpy_balance always reports the total at current_datetime -- the final score
+        # is therefore valued at the scenario's end tick, not the one before it.
+        # If that tick has no rates, fall back to the traded tick so a gap in the rate
+        # data cannot fail an otherwise valid trade.
+        try:
+            valuation_matrix = await self.rate_service.get_rate_matrix(new_datetime)
+        except RuntimeError:
+            valuation_matrix = rate_matrix
+
+        jpy_balance = await self._calculate_jpy_balance(balances, valuation_matrix)
         session.jpy_balance = jpy_balance
 
         # Save new balances at new timestamp

@@ -24,6 +24,14 @@ def dec(v) -> Decimal:
     return Decimal(str(v))
 
 
+def fetch_rates(timestamp: str) -> dict:
+    """Rates at a timestamp, or {} when that tick has no rate data."""
+    resp = requests.get(f"{BASE_URL}/api/rate/{timestamp}")
+    if resp.status_code != 200:
+        return {}
+    return {k: dec(v) for k, v in resp.json()["rates"].items()}
+
+
 def main():
     print(f"Scenario : {SCENARIO}")
     print(f"User     : {USER_ID}")
@@ -110,9 +118,12 @@ def main():
                 )
 
         # ── 3. Verify jpy_balance = Σ holding * rate_to_jpy ──────────────────
+        # The server values the portfolio at current_datetime (the tick it just
+        # advanced to), falling back to the traded tick when that has no rates.
         if result["jpy_balance"] is not None:
+            valuation_rates = fetch_rates(result["current_datetime"]) or rates
             expected_jpy = sum(
-                amt * rates.get(ccy, Decimal("1"))
+                amt * valuation_rates.get(ccy, Decimal("1"))
                 for ccy, amt in new_bal.items()
             ).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
             actual_jpy = dec(result["jpy_balance"])
