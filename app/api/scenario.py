@@ -35,10 +35,13 @@ def _scenario_timestamps(scenario) -> list:
 
 @router.get("/", response_model=List[ScenarioResponse])
 async def list_scenarios(db: AsyncSession = Depends(get_db)):
-    """List all scenarios."""
+    """List all scenarios, except evaluation ones (names containing EVAL)."""
     service = ScenarioService(db)
     scenarios = await service.get_all()
-    return scenarios
+    # Evaluation scenarios are announced during the event; keep them out of the
+    # listing so participants cannot discover the names in advance. Direct
+    # lookups by name (and session start) still work once a name is announced.
+    return [s for s in scenarios if "EVAL" not in s.name.upper()]
 
 
 @router.get("/{name}", response_model=ScenarioResponse)
