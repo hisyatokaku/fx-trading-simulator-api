@@ -5,7 +5,10 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy import select
+
 from app.database import get_db
+from app.models.scenario import Scenario
 from app.schemas.rate import RateResponse, RateBulkUpload, RateBulkResponse
 from app.services.rate_service import RateService
 from app.utils.date_utils import parse_datetime
@@ -25,6 +28,23 @@ async def get_rates(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid timestamp format: {timestamp}"
+        )
+
+    # Reject lookups inside an evaluation scenario's window: iterating this
+    # endpoint minute by minute would reconstruct the scored day in advance.
+    # In-game rates are unaffected (POST /api/trade/next returns them as the
+    # session advances).
+    result = await db.execute(
+        select(Scenario.id).where(
+            Scenario.name.ilike("%eval%"),
+            Scenario.start_datetime <= dt,
+            Scenario.end_datetime >= dt,
+        ).limit(1)
+    )
+    if result.scalar_one_or_none() is not None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Rates inside an evaluation scenario window are not disclosed"
         )
 
     service = RateService(db)

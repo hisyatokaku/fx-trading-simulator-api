@@ -341,3 +341,19 @@ async def test_get_user_sessions(client: AsyncClient):
     data = response.json()
     assert data["total"] >= 2
     assert all(s["user_id"] == "multiuser" for s in data["sessions"])
+
+
+@pytest.mark.asyncio
+async def test_eval_scenario_gameplay_unaffected(client: AsyncClient):
+    """Sessions on EVAL scenarios still run and /next still returns rates."""
+    await setup_scenario_and_rates(client, "EVAL_PLAY")
+
+    start = await client.post("/api/trade/start/EVAL_PLAY/testuser")
+    assert start.status_code == 200
+
+    step = await client.post(
+        "/api/trade/next",
+        json={"session_id": start.json()["id"], "exchange_requests": []}
+    )
+    assert step.status_code == 200
+    assert "USD" in step.json()["rates"]
