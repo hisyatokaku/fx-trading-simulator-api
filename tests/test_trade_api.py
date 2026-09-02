@@ -357,3 +357,52 @@ async def test_eval_scenario_gameplay_unaffected(client: AsyncClient):
     )
     assert step.status_code == 200
     assert "USD" in step.json()["rates"]
+
+
+async def _run_to_completion(client: AsyncClient, session_id: int) -> None:
+    for _ in range(10):
+        resp = await client.post(
+            "/api/trade/next",
+            json={"session_id": session_id, "exchange_requests": []}
+        )
+        assert resp.status_code == 200
+        if resp.json()["is_complete"]:
+            return
+    raise AssertionError("session did not complete within 10 steps")
+
+
+@pytest.mark.asyncio
+async def test_eval_second_submission_rejected(client: AsyncClient):
+    """A completed EVAL session blocks further submissions (409)."""
+    await setup_scenario_and_rates(client, "EVAL_ONCE")
+
+    start = await client.post("/api/trade/start/EVAL_ONCE/testuser")
+    assert start.status_code == 200
+    await _run_to_completion(client, start.json()["id"])
+
+    retry = await client.post("/api/trade/start/EVAL_ONCE/testuser")
+    assert retry.status_code == 409
+    assert "already been submitted" in retry.json()["detail"]
+
+    # A different user is unaffected
+    other = await client.post("/api/trade/start/EVAL_ONCE/trader1")
+    assert other.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_eval_incomplete_session_can_restart(client: AsyncClient):
+    """An incomplete (crashed) EVAL run does not block a restart."""
+    await setup_scenario_and_rates(client, "EVAL_RETRY")
+
+    first = await client.post("/api/trade/start/EVAL_RETRY/testuser")
+    assert first.status_code == 200
+    step = await client.post(
+        "/api/trade/next",
+        json={"session_id": first.json()["id"], "exchange_requests": []}
+    )
+    assert step.status_code == 200
+    assert step.json()["is_complete"] is False
+
+    second = await client.post("/api/trade/start/EVAL_RETRY/testuser")
+    assert second.status_code == 200
+    assert second.json()["id"] != first.json()["id"]

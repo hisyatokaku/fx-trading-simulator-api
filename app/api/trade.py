@@ -9,7 +9,7 @@ from app.database import get_db
 from app.schemas.session import SessionResponse, SessionListResponse, SessionHistoryResponse
 from app.schemas.trade import TradeRequest, TradeResponse
 from app.services.scenario_service import ScenarioService
-from app.services.session_service import SessionService
+from app.services.session_service import AlreadySubmittedError, SessionService
 
 router = APIRouter()
 
@@ -71,6 +71,11 @@ async def start_session(
     except PermissionError as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(e)
+        )
+    except AlreadySubmittedError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(e)
         )
 
