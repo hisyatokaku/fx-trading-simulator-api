@@ -54,6 +54,16 @@ async def test_start_session(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_start_session_unregistered_user(client: AsyncClient):
+    """Unregistered user IDs are rejected with 403 (no auto-creation)."""
+    await setup_scenario_and_rates(client, "UNREG_TEST")
+
+    response = await client.post("/api/trade/start/UNREG_TEST/not-registered-id")
+    assert response.status_code == 403
+    assert "not registered" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
 async def test_start_session_scenario_not_found(client: AsyncClient):
     """Test starting session with non-existent scenario."""
     response = await client.post("/api/trade/start/NONEXISTENT/testuser")

@@ -1,0 +1,66 @@
+# 本番参加者用ID（2026-09-02 再生成、60名分）。1行1ID。# で始まる行と空行は無視
+# この一覧はリポジトリで管理する（2026-09-02 決定）。public リポジトリのため、未ログインの ID は
+# 先着ログインで他人に取られ得る。配布後すみやかに本人がログインしてパスワードを確定させる運用で対処する
+# 旧リスト（2026-08-29 生成）は全て破棄し、未使用の新 ID に置き換えた（Hub 上の旧ユーザーも削除する）
+# 形式: 英数5文字。0 o i l 1 は使わない（タイポ防止）。31 文字から乱数生成（約 2,860 万通り）
+# 参加者との対応は行順（1行目=1人目）。氏名との対応表は git に入れない
+5rkk8
+3qs9z
+f2h85
+pctmu
+37x74
+vry9t
+4wq3c
+wp5wn
+5zdcz
+qzreg
+up35z
+4346t
+byugp
+8x96n
+zth7w
+wbjfz
+egke5
+hhwqb
+hze6m
+xjb8q
+ex8zc
+y8u48
+j6wk9
+skj7d
+dbhdr
+kjnyz
+hzvbg
+k5tpr
+x5zjw
+qm2kk
+2vtsr
+2rx57
+9pb9m
+6ukdt
+b28vk
+y3xy7
+2w3cb
+24reh
+z73g6
+4jc96
+g34a9
+kmtg9
+qxvm2
+7zd3j
+eju96
+dwk9b
+ph6ua
+tr7g3
+g8r2f
+6tccp
+qkgyq
+qu7ka
+hrre5
+nt3rk
+bd7u3
+h8qfh
+j7p6d
+tfekb
+xf9am
+na59y

@@ -11,7 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 
 from app.database import Base, get_db
 from app.main import app
-from app.models import Scenario, Trader, Rate
+from app.models import Scenario, Rate
+from app.services import session_service
 
 
 # Use in-memory SQLite for testing
@@ -82,6 +83,14 @@ async def client(test_engine) -> AsyncGenerator[AsyncClient, None]:
                 await session.rollback()
                 raise
 
+    # Allow the user IDs used across tests
+    # (start_session checks a hardcoded allowlist; unlisted IDs get 403)
+    saved_allowlist = session_service.ALLOWED_USER_IDS
+    session_service.ALLOWED_USER_IDS = saved_allowlist | {
+        "gap_trader", "history_trader", "multiuser", "testuser",
+        "trader1", "trader2", "trader3", "trader4", "trader5",
+    }
+
     app.dependency_overrides[get_db] = override_get_db
 
     transport = ASGITransport(app=app)
@@ -89,6 +98,7 @@ async def client(test_engine) -> AsyncGenerator[AsyncClient, None]:
         yield ac
 
     app.dependency_overrides.clear()
+    session_service.ALLOWED_USER_IDS = saved_allowlist
 
 
 @pytest_asyncio.fixture

@@ -10,7 +10,6 @@ from sqlalchemy.orm import joinedload, selectinload
 
 from app.models.session import TradingSession
 from app.models.balance import Balance
-from app.models.trader import Trader
 from app.models.scenario import Scenario
 from app.schemas.trade import ExchangeRequest, TradeResult
 from app.services.rate_service import RateService
@@ -22,6 +21,29 @@ CURRENCIES = [
     "JPY", "USD", "EUR", "GBP", "AUD", "NZD", "CAD", "CHF",
     "TRY", "ZAR", "MXN", "NOK", "SEK", "HKD",
 ]
+
+# Users allowed to start sessions (no DB call; kept in code by design).
+# Sources: infra-setup/users/participants.txt (60) + testers.txt (8) + ops IDs (5).
+# NOTE: adding an ID requires BOTH adding it here (and redeploying) AND registering
+# it in the traders table (trading_sessions.user_id has a FK to traders).
+ALLOWED_USER_IDS = frozenset([
+    # participants (2026-09-02)
+    "5rkk8", "3qs9z", "f2h85", "pctmu", "37x74", "vry9t",
+    "4wq3c", "wp5wn", "5zdcz", "qzreg", "up35z", "4346t",
+    "byugp", "8x96n", "zth7w", "wbjfz", "egke5", "hhwqb",
+    "hze6m", "xjb8q", "ex8zc", "y8u48", "j6wk9", "skj7d",
+    "dbhdr", "kjnyz", "hzvbg", "k5tpr", "x5zjw", "qm2kk",
+    "2vtsr", "2rx57", "9pb9m", "6ukdt", "b28vk", "y3xy7",
+    "2w3cb", "24reh", "z73g6", "4jc96", "g34a9", "kmtg9",
+    "qxvm2", "7zd3j", "eju96", "dwk9b", "ph6ua", "tr7g3",
+    "g8r2f", "6tccp", "qkgyq", "qu7ka", "hrre5", "nt3rk",
+    "bd7u3", "h8qfh", "j7p6d", "tfekb", "xf9am", "na59y",
+    # testers
+    "tester-1", "tester-2", "tester-3", "tester-4", "tester-5", "tester-6",
+    "tester-7", "tester-8",
+    # ops / e2e
+    "testuser", "demouser", "yukiyk", "produser", "latency-check",
+])
 
 
 class SessionService:
@@ -37,8 +59,8 @@ class SessionService:
         scenario: Scenario
     ) -> TradingSession:
         """Start a new trading session for a user in a scenario."""
-        # Ensure trader exists
-        trader = await self._ensure_trader(user_id, scenario.game_type)
+        # Reject users that are not on the allowlist
+        self._check_user_allowed(user_id)
 
         # Create session
         session = TradingSession(
@@ -77,20 +99,13 @@ class SessionService:
         await self.db.refresh(session)
         return session
 
-    async def _ensure_trader(self, user_id: str, game_type: str) -> Trader:
-        """Ensure trader exists, create if not."""
-        result = await self.db.execute(
-            select(Trader).where(Trader.user_id == user_id)
-        )
-        trader = result.scalar_one_or_none()
-
-        if not trader:
-            trader_type = "prod" if game_type == "PROD" else "test"
-            trader = Trader(user_id=user_id, type=trader_type)
-            self.db.add(trader)
-            await self.db.flush()
-
-        return trader
+    @staticmethod
+    def _check_user_allowed(user_id: str) -> None:
+        """Reject user_ids that are not on the hardcoded allowlist (no DB call)."""
+        if user_id not in ALLOWED_USER_IDS:
+            raise PermissionError(
+                f"user_id '{user_id}' is not registered. Use the ID distributed by the staff."
+            )
 
     async def get_session(self, session_id: int) -> Optional[TradingSession]:
         """Get a session by ID with its scenario loaded."""

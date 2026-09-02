@@ -66,7 +66,13 @@ async def start_session(
 
     # Create session
     session_service = SessionService(db)
-    session = await session_service.start_session(user_id, scenario_obj)
+    try:
+        session = await session_service.start_session(user_id, scenario_obj)
+    except PermissionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(e)
+        )
 
     # Get initial balances
     balances = await session_service.get_current_balances(session)
