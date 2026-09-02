@@ -276,3 +276,28 @@ async def test_bulk_upload_scenarios_update(client: AsyncClient):
     updated = await client.get("/api/scenario/BULK_UPDATE")
     assert updated.json()["time_interval_seconds"] == 3600
     assert updated.json()["initial_balance"] == 500000
+
+
+@pytest.mark.asyncio
+async def test_list_scenarios_hides_eval(client: AsyncClient):
+    """Scenario names containing EVAL are hidden from the listing but remain
+    directly fetchable by name (so session start keeps working once announced)."""
+    for name in ["EVAL_HIDDEN", "VISIBLE_X"]:
+        await client.post(
+            "/api/scenario/",
+            json={
+                "name": name,
+                "start_datetime": "2016-01-04T00:00:00",
+                "end_datetime": "2016-01-08T00:00:00",
+                "time_interval_seconds": 86400,
+                "initial_balance": 1000000,
+            }
+        )
+
+    names = [s["name"] for s in (await client.get("/api/scenario/")).json()]
+    assert "VISIBLE_X" in names
+    assert "EVAL_HIDDEN" not in names
+
+    response = await client.get("/api/scenario/EVAL_HIDDEN")
+    assert response.status_code == 200
+    assert response.json()["name"] == "EVAL_HIDDEN"
