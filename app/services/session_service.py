@@ -46,6 +46,10 @@ ALLOWED_USER_IDS = frozenset([
 ])
 
 
+class AlreadySubmittedError(Exception):
+    """A completed evaluation session already exists for this user/scenario."""
+
+
 class SessionService:
     """Service for trading session operations."""
 
@@ -61,6 +65,24 @@ class SessionService:
         """Start a new trading session for a user in a scenario."""
         # Reject users that are not on the allowlist
         self._check_user_allowed(user_id)
+
+        # Evaluation scenarios accept one submission per user: once a
+        # completed session exists, further starts are rejected (409).
+        # Incomplete sessions (crashed kernel, dropped connection) may be
+        # restarted, so genuine accidents need no operator intervention.
+        if "EVAL" in scenario.name.upper():
+            result = await self.db.execute(
+                select(TradingSession.id).where(
+                    TradingSession.user_id == user_id,
+                    TradingSession.scenario_id == scenario.id,
+                    TradingSession.is_complete.is_(True),
+                ).limit(1)
+            )
+            if result.scalar_one_or_none() is not None:
+                raise AlreadySubmittedError(
+                    f"Scenario '{scenario.name}' has already been submitted by "
+                    f"'{user_id}' (evaluation runs are accepted once)"
+                )
 
         # Create session
         session = TradingSession(
