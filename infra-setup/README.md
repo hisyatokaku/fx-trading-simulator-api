@@ -27,13 +27,13 @@ FXトレーディング演習の実行環境（app/DB VM + TLJH VM の2台構成
 
 ## リハーサル → 本番の流れ
 
-1. `07_distribute_notebook.sh document/tutorial.ipynb`（Day 1）と `document/colab_template.ipynb`（Day 2）で教材配布 → 運営がリハーサル用ID
+1. `07_distribute_notebook.sh document/day1/day1.ipynb`（Day 1）と `document/day2/day2.ipynb`（Day 2）で教材配布 → 運営がリハーサル用ID
    （例: `rehearsal-*`）でログインしてリハーサル実施
 2. リハーサルユーザーの掃除（任意）: VM 上で `sudo userdel -r jupyter-rehearsal-<id>` + TLJH 管理画面から削除
 3. ノートブックを更新したら再度 `07_distribute_notebook.sh`（/etc/skel も更新されるため、
    その後に初回ログインする本番ユーザーには自動で最新版が入る。
    本番は参加者に事前配布したIDで初回ログインしてもらう）
-4. Day 2 教材（`colab_template.ipynb`）は Day 1 と同時に配布済み。差し替えが必要なら別ファイル名で 07 を実行（既存ホームにもそのまま入る）
+4. Day 2 教材（`day2.ipynb`、旧 colab_template.ipynb）は Day 1 と同時に配布済み。差し替えが必要なら別ファイル名で 07 を実行（既存ホームにもそのまま入る）
 
 注意: 07 は既存ホームの同名ファイルを**絶対に上書きしない**（上書きオプションは事故防止のため無い）。
 内容を更新して配り直すときは別のファイル名にする（例: `tutorial-v2.ipynb`）。
