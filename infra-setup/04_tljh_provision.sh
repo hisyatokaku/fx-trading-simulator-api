@@ -41,7 +41,7 @@ TLJH_CONFIG=/opt/tljh/hub/bin/tljh-config
 "$TLJH_CONFIG" set limits.cpu 1
 
 # --- 全ユーザーのノートブックに FX_API_BASE_URL を配る ---
-# （tutorial.ipynb は os.environ.get("FX_API_BASE_URL", ...) で参照する）
+# （day1.ipynb は os.environ.get("FX_API_BASE_URL", ...) で参照する）
 mkdir -p /opt/tljh/config/jupyterhub_config.d
 cat > /opt/tljh/config/jupyterhub_config.d/fx_env.py <<EOF
 c.Spawner.environment = {"FX_API_BASE_URL": "http://${APP_IP}:8000"}

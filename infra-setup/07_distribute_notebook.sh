@@ -2,7 +2,7 @@
 # ノートブック（等のファイル）を /etc/skel と全参加者のホームに配布する。
 #
 # 使い方:
-#   bash 07_distribute_notebook.sh document/tutorial.ipynb
+#   bash 07_distribute_notebook.sh document/day1/day1.ipynb
 #
 # - /etc/skel に置くので、配布後に初回ログインした新規ユーザーにも自動で入る
 # - 既存ホームには for 文でコピー。既に同名ファイルがある人は必ずスキップする
