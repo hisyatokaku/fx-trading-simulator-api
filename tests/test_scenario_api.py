@@ -351,3 +351,17 @@ async def test_rate_lookup_forbidden_inside_eval_window(client: AsyncClient):
 
     response = await client.get("/api/rate/2016-02-01T00:00:00")
     assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_scenario_rates_cache_control(client: AsyncClient):
+    """Scenario rates carry an immutable Cache-Control header."""
+    await client.post("/api/scenario/", json={
+        "name": "RATES_CACHE", "start_datetime": "2016-01-04T00:00:00",
+        "end_datetime": "2016-01-05T00:00:00", "time_interval_seconds": 86400,
+        "initial_balance": 1000000})
+    await client.post("/api/rate/bulk", json={"rates": [
+        {"currency": "USD", "timestamp": "2016-01-04T00:00:00", "rate_to_jpy": "118.25"}]})
+    r = await client.get("/api/scenario/RATES_CACHE/rates")
+    assert r.status_code == 200
+    assert "immutable" in r.headers.get("cache-control", "")

@@ -357,3 +357,27 @@ async def test_eval_scenario_gameplay_unaffected(client: AsyncClient):
     )
     assert step.status_code == 200
     assert "USD" in step.json()["rates"]
+
+
+@pytest.mark.asyncio
+async def test_history_cache_control(client: AsyncClient):
+    """Completed session history is cacheable; in-progress is not."""
+    await setup_scenario_and_rates(client, "CACHE_TEST")
+    start = await client.post("/api/trade/start/CACHE_TEST/testuser")
+    sid = start.json()["id"]
+
+    # in-progress -> no-store
+    r = await client.get(f"/api/trade/session/{sid}/history")
+    assert r.status_code == 200
+    assert "no-store" in r.headers.get("cache-control", "")
+
+    # complete it
+    for _ in range(10):
+        resp = await client.post("/api/trade/next", json={"session_id": sid, "exchange_requests": []})
+        if resp.json()["is_complete"]:
+            break
+
+    # completed -> immutable
+    r = await client.get(f"/api/trade/session/{sid}/history")
+    assert r.status_code == 200
+    assert "immutable" in r.headers.get("cache-control", "")
