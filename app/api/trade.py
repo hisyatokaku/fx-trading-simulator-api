@@ -2,7 +2,7 @@
 
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -157,6 +157,7 @@ async def get_session(
 @router.get("/session/{session_id}/history", response_model=SessionHistoryResponse)
 async def get_session_history(
     session_id: int,
+    response: Response,
     db: AsyncSession = Depends(get_db)
 ):
     """Get session details and every recorded balance snapshot."""
@@ -171,9 +172,17 @@ async def get_session_history(
 
     balances = await session_service.get_current_balances(session)
     history = await session_service.get_balance_history(session_id)
-    response = _build_session_response(session, balances)
+
+    # A completed session's history never changes -> cache it hard.
+    # An in-progress session grows on every /next -> never cache.
+    if session.is_complete:
+        response.headers["Cache-Control"] = "public, max-age=86400, immutable"
+    else:
+        response.headers["Cache-Control"] = "no-store"
+
+    session_response = _build_session_response(session, balances)
     return SessionHistoryResponse(
-        **response.model_dump(),
+        **session_response.model_dump(),
         balance_history=history,
     )
 

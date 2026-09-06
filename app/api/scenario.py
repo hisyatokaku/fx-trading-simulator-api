@@ -2,7 +2,7 @@
 
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -58,7 +58,7 @@ async def get_scenario(name: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{name}/rates", response_model=ScenarioRatesResponse)
-async def get_scenario_rates(name: str, db: AsyncSession = Depends(get_db)):
+async def get_scenario_rates(name: str, response: Response, db: AsyncSession = Depends(get_db)):
     """Get rates at every timestamp visited by a scenario."""
     # Evaluation scenario rates must not be disclosed in advance: a single
     # request here would reveal the whole day the participants are scored on.
@@ -67,6 +67,8 @@ async def get_scenario_rates(name: str, db: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Rates for evaluation scenarios are not disclosed"
         )
+    # A scenario's rates are immutable historical data -> cache them hard.
+    response.headers["Cache-Control"] = "public, max-age=86400, immutable"
     scenario_service = ScenarioService(db)
     scenario = await scenario_service.get_by_name(name)
     if not scenario:
