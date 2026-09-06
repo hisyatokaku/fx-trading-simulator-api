@@ -14,6 +14,10 @@ async_engine = create_async_engine(
     settings.database_url,
     echo=settings.debug,
     future=True,
+    pool_size=settings.db_pool_size,
+    max_overflow=settings.db_max_overflow,
+    pool_timeout=settings.db_pool_timeout,
+    pool_pre_ping=True,   # 切れた接続を掴んで 500 になる事故を防ぐ
 )
 
 # Async session factory

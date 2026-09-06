@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     default_initial_balance: float = 1000000.0
     default_time_interval_seconds: int = 86400  # 1 day
 
+    # DB connection pool (per uvicorn worker). With N workers the DB sees
+    # N*(pool_size+max_overflow) connections at most; keep that under
+    # Postgres max_connections (default 100). Tune via env vars.
+    db_pool_size: int = 5
+    db_max_overflow: int = 5
+    db_pool_timeout: int = 30
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
