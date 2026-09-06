@@ -43,6 +43,8 @@ ALLOWED_USER_IDS = frozenset([
     "tester-7", "tester-8",
     # ops / e2e
     "testuser", "demouser", "yukiyk", "produser", "latency-check",
+    # admins (TLJH の管理者。動作確認・戦略試走で API を叩けるように)
+    "tonkou", "kein",
 ])
 
 
