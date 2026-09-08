@@ -130,7 +130,7 @@ pytest tests/ -v
 ```bash
 python scripts/verify_scenario.py                          # DEMO_5MIN (default)
 python scripts/verify_scenario.py DEMO_3DAY testuser
-python scripts/verify_scenario.py DEMO_5MIN testuser http://your-server.com
+python scripts/verify_scenario.py DEMO_5MIN testuser http://34.146.231.219:8000
 ```
 
 ---
