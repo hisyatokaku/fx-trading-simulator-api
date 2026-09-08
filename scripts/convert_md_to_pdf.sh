@@ -3,4 +3,4 @@ cd document \
   --launch-options='{"args":["--no-sandbox"]}' \
   --basedir=. \
   --css='img { max-width: 100%; height: auto; }' \
-  day2/one-pager.md
+  unused/one-pager.md
