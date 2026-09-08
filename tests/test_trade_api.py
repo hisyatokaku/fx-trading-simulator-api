@@ -404,7 +404,8 @@ async def test_eval_second_submission_rejected(client: AsyncClient):
 
     retry = await client.post("/api/trade/start/EVAL_ONCE/testuser")
     assert retry.status_code == 409
-    assert "already been submitted" in retry.json()["detail"]
+    assert "提出済み" in retry.json()["detail"]
+    assert "EVAL_ONCE" in retry.json()["detail"]
 
     # A different user is unaffected
     other = await client.post("/api/trade/start/EVAL_ONCE/trader1")
