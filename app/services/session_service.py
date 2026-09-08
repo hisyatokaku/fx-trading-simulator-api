@@ -82,8 +82,8 @@ class SessionService:
             )
             if result.scalar_one_or_none() is not None:
                 raise AlreadySubmittedError(
-                    f"Scenario '{scenario.name}' has already been submitted by "
-                    f"'{user_id}' (evaluation runs are accepted once)"
+                    f"評価シナリオ '{scenario.name}' は user_id '{user_id}' で提出済みです。"
+                    "評価の提出は 1 回限りのため、同じシナリオは再実行できません。"
                 )
 
         # Create session
