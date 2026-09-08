@@ -23,7 +23,8 @@ CURRENCIES = [
 ]
 
 # Users allowed to start sessions (no DB call; kept in code by design).
-# Sources: infra-setup/users/participants.txt (60) + testers.txt (8) + ops IDs (5).
+# Sources: infra-setup/users/participants.txt (60) + team IDs group-1..10 (10)
+#          + testers.txt (8) + ops IDs (5) + admins (2).
 # NOTE: adding an ID requires BOTH adding it here (and redeploying) AND registering
 # it in the traders table (trading_sessions.user_id has a FK to traders).
 ALLOWED_USER_IDS = frozenset([
@@ -38,6 +39,9 @@ ALLOWED_USER_IDS = frozenset([
     "qxvm2", "7zd3j", "eju96", "dwk9b", "ph6ua", "tr7g3",
     "g8r2f", "6tccp", "qkgyq", "qu7ka", "hrre5", "nt3rk",
     "bd7u3", "h8qfh", "j7p6d", "tfekb", "xf9am", "na59y",
+    # team submission IDs (Day 2, one per team)
+    "group-1", "group-2", "group-3", "group-4", "group-5",
+    "group-6", "group-7", "group-8", "group-9", "group-10",
     # testers
     "tester-1", "tester-2", "tester-3", "tester-4", "tester-5", "tester-6",
     "tester-7", "tester-8",
