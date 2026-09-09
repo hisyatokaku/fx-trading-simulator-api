@@ -348,7 +348,7 @@ async def test_eval_scenario_gameplay_unaffected(client: AsyncClient):
     """Sessions on EVAL scenarios still run and /next still returns rates."""
     await setup_scenario_and_rates(client, "EVAL_PLAY")
 
-    start = await client.post("/api/trade/start/EVAL_PLAY/testuser")
+    start = await client.post("/api/trade/start/EVAL_PLAY/group-1")
     assert start.status_code == 200
 
     step = await client.post(
@@ -398,17 +398,17 @@ async def test_eval_second_submission_rejected(client: AsyncClient):
     """A completed EVAL session blocks further submissions (409)."""
     await setup_scenario_and_rates(client, "EVAL_ONCE")
 
-    start = await client.post("/api/trade/start/EVAL_ONCE/testuser")
+    start = await client.post("/api/trade/start/EVAL_ONCE/group-1")
     assert start.status_code == 200
     await _run_to_completion(client, start.json()["id"])
 
-    retry = await client.post("/api/trade/start/EVAL_ONCE/testuser")
+    retry = await client.post("/api/trade/start/EVAL_ONCE/group-1")
     assert retry.status_code == 409
     assert "提出済み" in retry.json()["detail"]
     assert "EVAL_ONCE" in retry.json()["detail"]
 
     # A different user is unaffected
-    other = await client.post("/api/trade/start/EVAL_ONCE/trader1")
+    other = await client.post("/api/trade/start/EVAL_ONCE/group-2")
     assert other.status_code == 200
 
 
@@ -417,7 +417,7 @@ async def test_eval_incomplete_session_can_restart(client: AsyncClient):
     """An incomplete (crashed) EVAL run does not block a restart."""
     await setup_scenario_and_rates(client, "EVAL_RETRY")
 
-    first = await client.post("/api/trade/start/EVAL_RETRY/testuser")
+    first = await client.post("/api/trade/start/EVAL_RETRY/group-1")
     assert first.status_code == 200
     step = await client.post(
         "/api/trade/next",
@@ -426,6 +426,31 @@ async def test_eval_incomplete_session_can_restart(client: AsyncClient):
     assert step.status_code == 200
     assert step.json()["is_complete"] is False
 
-    second = await client.post("/api/trade/start/EVAL_RETRY/testuser")
+    second = await client.post("/api/trade/start/EVAL_RETRY/group-1")
     assert second.status_code == 200
     assert second.json()["id"] != first.json()["id"]
+
+
+@pytest.mark.asyncio
+async def test_eval_requires_team_id(client: AsyncClient):
+    """EVAL scenarios accept team IDs (group-N) and admins; individual IDs get 403."""
+    await setup_scenario_and_rates(client, "EVAL_TEAM")
+
+    individual = await client.post("/api/trade/start/EVAL_TEAM/testuser")
+    assert individual.status_code == 403
+    assert "チーム ID" in individual.json()["detail"]
+
+    team = await client.post("/api/trade/start/EVAL_TEAM/group-3")
+    assert team.status_code == 200
+
+    admin = await client.post("/api/trade/start/EVAL_TEAM/tonkou")
+    assert admin.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_non_eval_scenario_open_to_individual_ids(client: AsyncClient):
+    """The team-only rule applies to EVAL scenarios only."""
+    await setup_scenario_and_rates(client, "TEST_OPEN")
+
+    resp = await client.post("/api/trade/start/TEST_OPEN/testuser")
+    assert resp.status_code == 200

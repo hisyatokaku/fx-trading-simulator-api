@@ -51,6 +51,12 @@ ALLOWED_USER_IDS = frozenset([
     "tonkou", "kein",
 ])
 
+# Evaluation (EVAL*) scenarios accept submissions only from team IDs
+# (group-1..group-10). Individual participant IDs must use TEST scenarios.
+# Admins are exempt so the flow can be rehearsed.
+EVAL_SUBMITTER_PREFIX = "group-"
+EVAL_EXEMPT_USER_IDS = frozenset(["tonkou", "kein"])
+
 
 class AlreadySubmittedError(Exception):
     """A completed evaluation session already exists for this user/scenario."""
@@ -77,6 +83,11 @@ class SessionService:
         # Incomplete sessions (crashed kernel, dropped connection) may be
         # restarted, so genuine accidents need no operator intervention.
         if "EVAL" in scenario.name.upper():
+            if not (user_id.startswith(EVAL_SUBMITTER_PREFIX) or user_id in EVAL_EXEMPT_USER_IDS):
+                raise PermissionError(
+                    f"評価シナリオ '{scenario.name}' はチーム ID（group-1〜group-10）でのみ提出できます。"
+                    f"user_id '{user_id}' では TEST シナリオを使ってください。"
+                )
             result = await self.db.execute(
                 select(TradingSession.id).where(
                     TradingSession.user_id == user_id,
