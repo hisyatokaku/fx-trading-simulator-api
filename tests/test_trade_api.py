@@ -429,3 +429,35 @@ async def test_eval_incomplete_session_can_restart(client: AsyncClient):
     second = await client.post("/api/trade/start/EVAL_RETRY/testuser")
     assert second.status_code == 200
     assert second.json()["id"] != first.json()["id"]
+
+
+@pytest.mark.asyncio
+async def test_trade_into_unsupported_currency_is_skipped(client: AsyncClient):
+    """A stray CNY rate must not make CNY tradable or visible in a session."""
+    await setup_scenario_and_rates(client, "STRAY_CNY")
+    await client.post(
+        "/api/rate/bulk",
+        json={"rates": [
+            {"currency": "CNY", "timestamp": "2016-01-04T00:00:00", "rate_to_jpy": "18.05"},
+        ]}
+    )
+
+    start = await client.post("/api/trade/start/STRAY_CNY/testuser")
+    assert start.status_code == 200
+
+    resp = await client.post(
+        "/api/trade/next",
+        json={
+            "session_id": start.json()["id"],
+            "exchange_requests": [
+                {"currency_from": "JPY", "currency_to": "CNY", "amount": 1000},
+                {"currency_from": "JPY", "currency_to": "USD", "amount": 1000},
+            ],
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert [t["currency_to"] for t in data["trades"]] == ["USD"]
+    assert "CNY" not in data["balances"]
+    assert "CNY" not in data["rates"]
+    assert data["balances"]["JPY"] == 999000.0

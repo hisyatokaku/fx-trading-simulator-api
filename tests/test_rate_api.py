@@ -78,3 +78,22 @@ async def test_get_rates_not_found(client: AsyncClient):
     """Test getting rates for non-existent timestamp."""
     response = await client.get("/api/rate/2020-01-01T00:00:00")
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_rates_excludes_unsupported_currency(client: AsyncClient):
+    """A stray rate row for an unsupported currency is never returned."""
+    await client.post(
+        "/api/rate/bulk",
+        json={
+            "rates": [
+                {"currency": "USD", "timestamp": "2016-04-14T00:00:00", "rate_to_jpy": "109.00"},
+                {"currency": "CNY", "timestamp": "2016-04-14T00:00:00", "rate_to_jpy": "16.80"},
+            ]
+        }
+    )
+
+    response = await client.get("/api/rate/2016-04-14T00:00:00")
+    assert response.status_code == 200
+    assert "USD" in response.json()["rates"]
+    assert "CNY" not in response.json()["rates"]

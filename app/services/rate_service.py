@@ -8,6 +8,7 @@ from sqlalchemy import select, and_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.currencies import SUPPORTED_CURRENCIES
 from app.models.rate import Rate
 from app.schemas.rate import RateEntry
 from app.utils.rate_matrix import RateMatrix
@@ -25,7 +26,10 @@ class RateService:
         Raises RuntimeError if no rates exist for the given timestamp.
         """
         result = await self.db.execute(
-            select(Rate).where(Rate.timestamp == timestamp)
+            select(Rate).where(and_(
+                Rate.timestamp == timestamp,
+                Rate.currency.in_(SUPPORTED_CURRENCIES),
+            ))
         )
         rows = result.scalars().all()
 
@@ -49,7 +53,10 @@ class RateService:
 
         result = await self.db.execute(
             select(Rate)
-            .where(Rate.timestamp.in_(timestamps))
+            .where(and_(
+                Rate.timestamp.in_(timestamps),
+                Rate.currency.in_(SUPPORTED_CURRENCIES),
+            ))
             .order_by(Rate.timestamp, Rate.currency)
         )
 

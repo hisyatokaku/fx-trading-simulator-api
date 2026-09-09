@@ -12,15 +12,9 @@ from app.models.session import TradingSession
 from app.models.balance import Balance
 from app.models.scenario import Scenario
 from app.schemas.trade import ExchangeRequest, TradeResult
+from app.currencies import SUPPORTED_CURRENCIES as CURRENCIES
 from app.services.rate_service import RateService
 from app.utils.date_utils import add_interval
-
-
-# Supported currencies
-CURRENCIES = [
-    "JPY", "USD", "EUR", "GBP", "AUD", "NZD", "CAD", "CHF",
-    "TRY", "ZAR", "MXN", "NOK", "SEK", "HKD",
-]
 
 # Users allowed to start sessions (no DB call; kept in code by design).
 # Sources: infra-setup/users/participants.txt (60) + testers.txt (8) + ops IDs (5).
@@ -254,6 +248,10 @@ class SessionService:
         """Execute a single trade, updating balances in place."""
         currency_from = request.currency_from.upper()
         currency_to = request.currency_to.upper()
+
+        # Unsupported currencies are skipped, even if a stray rate row exists
+        if currency_from not in CURRENCIES or currency_to not in CURRENCIES:
+            return None
 
         current_balance = balances.get(currency_from, Decimal("0"))
         if current_balance < request.amount:
