@@ -23,7 +23,8 @@ CURRENCIES = [
 ]
 
 # Users allowed to start sessions (no DB call; kept in code by design).
-# Sources: infra-setup/users/participants.txt (60) + testers.txt (8) + ops IDs (5).
+# Sources: infra-setup/users/participants.txt (60) + team IDs group-1..10 (10)
+#          + testers.txt (8) + ops IDs (5) + admins (2).
 # NOTE: adding an ID requires BOTH adding it here (and redeploying) AND registering
 # it in the traders table (trading_sessions.user_id has a FK to traders).
 ALLOWED_USER_IDS = frozenset([
@@ -38,6 +39,9 @@ ALLOWED_USER_IDS = frozenset([
     "qxvm2", "7zd3j", "eju96", "dwk9b", "ph6ua", "tr7g3",
     "g8r2f", "6tccp", "qkgyq", "qu7ka", "hrre5", "nt3rk",
     "bd7u3", "h8qfh", "j7p6d", "tfekb", "xf9am", "na59y",
+    # team submission IDs (Day 2, one per team)
+    "group-1", "group-2", "group-3", "group-4", "group-5",
+    "group-6", "group-7", "group-8", "group-9", "group-10",
     # testers
     "tester-1", "tester-2", "tester-3", "tester-4", "tester-5", "tester-6",
     "tester-7", "tester-8",
@@ -46,6 +50,12 @@ ALLOWED_USER_IDS = frozenset([
     # admins (TLJH の管理者。動作確認・戦略試走で API を叩けるように)
     "tonkou", "kein",
 ])
+
+# Evaluation (EVAL*) scenarios accept submissions only from team IDs
+# (group-1..group-10). Individual participant IDs must use TEST scenarios.
+# Admins are exempt so the flow can be rehearsed.
+EVAL_SUBMITTER_PREFIX = "group-"
+EVAL_EXEMPT_USER_IDS = frozenset(["tonkou", "kein"])
 
 
 class AlreadySubmittedError(Exception):
@@ -73,6 +83,11 @@ class SessionService:
         # Incomplete sessions (crashed kernel, dropped connection) may be
         # restarted, so genuine accidents need no operator intervention.
         if "EVAL" in scenario.name.upper():
+            if not (user_id.startswith(EVAL_SUBMITTER_PREFIX) or user_id in EVAL_EXEMPT_USER_IDS):
+                raise PermissionError(
+                    f"評価シナリオ '{scenario.name}' はチーム ID（group-1〜group-10）でのみ提出できます。"
+                    f"user_id '{user_id}' では TEST シナリオを使ってください。"
+                )
             result = await self.db.execute(
                 select(TradingSession.id).where(
                     TradingSession.user_id == user_id,
